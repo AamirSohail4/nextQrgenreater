@@ -40,7 +40,7 @@ function AddQRCode() {
     try {
       setIsSubmitting(true);
       const response = await fetch(
-        "http://localhost:5000/api/codes/add_qrCode",
+        "https://51.112.24.26:5003/api/codes/add_qrCode",
         {
           method: "POST",
           headers: {
