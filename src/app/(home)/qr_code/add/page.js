@@ -58,7 +58,7 @@ export default function AddEvent() {
         qrCodDisplay();
         setCount("");
         setQrCodes([]);
-        router.push("/qr_Codes"); // Navigate to another page if needed
+        router.push("/qr_code"); // Navigate to another page if needed
       } else {
         const error = await response.json();
         alert(`Error: ${error.message}`);
@@ -76,7 +76,7 @@ export default function AddEvent() {
   };
 
   const handleCancel = () => {
-    router.push("/qr_Codes");
+    router.push("/qr_code");
   };
 
   return (

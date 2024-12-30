@@ -16,26 +16,60 @@ import QRCode from "qrcode";
 import withAuth from "@/components/HOC"; // Import the HOC
 import * as XLSX from "xlsx"; // Import XLSX for Excel export
 import Image from "next/image";
+import Modal from "react-modal";
+import DatePicker from "react-datepicker";
+import "react-datepicker/dist/react-datepicker.css";
+// React Modal custom styles
+const customStyles = {
+  content: {
+    top: "50%",
+    left: "50%",
+    right: "auto",
+    bottom: "auto",
+    marginRight: "-50%",
+    transform: "translate(-50%, -50%)",
+    padding: "20px",
+    textAlign: "center",
+  },
+  overlay: {
+    backgroundColor: "rgba(0, 0, 0, 0.75)",
+  },
+};
 
 function Event({ authData }) {
   const { qrCode, qrCodDisplay } = useAppContext();
   const { Canvas } = useQRCode();
   const [loading, setLoading] = useState(null);
   const qrCodeRef = useRef(null);
+
   const [currentPage, setCurrentPage] = useState(1);
   const [searchCode, setSearchCode] = useState(""); // State for QR Code search
   const [searchDate, setSearchDate] = useState(""); // State for Date search
-
+  const [isModalOpen, setIsModalOpen] = useState(false); // Modal state
+  const [qrCodeData, setQrCodeData] = useState(null); // QR code data for the modal
   const eventsPerPage = 10;
 
   // Filter events based on search criteria
+  // const filteredEvents = qrCode.filter((event) => {
+  //   const matchesCode = event.strCode
+  //     .toLowerCase()
+  //     .includes(searchCode.toLowerCase());
+  //   const matchesDate =
+  //     searchDate === "" ||
+  //     format(new Date(event.dtCreated_at), "yyyy-MM-dd").includes(searchDate);
+  //   return matchesCode && matchesDate;
+  // });
   const filteredEvents = qrCode.filter((event) => {
     const matchesCode = event.strCode
       .toLowerCase()
       .includes(searchCode.toLowerCase());
+
+    // Ensure searchDate is a valid Date object before comparing
     const matchesDate =
-      searchDate === "" ||
-      format(new Date(event.dtCreated_at), "yyyy-MM-dd").includes(searchDate);
+      !searchDate || // If searchDate is empty, don't filter by date
+      format(new Date(event.dtCreated_at), "yyyy-MM-dd") ===
+        format(searchDate, "yyyy-MM-dd");
+
     return matchesCode && matchesDate;
   });
 
@@ -92,9 +126,25 @@ function Event({ authData }) {
 
   // Function to handle exporting to Excel
   const handleExcle = () => {
-    const ws = XLSX.utils.json_to_sheet(filteredEvents);
+    // Transform the data to match the desired headings and format
+    const formattedData = filteredEvents.map((event, index) => ({
+      Sr: index + 1, // Add a serial number
+      "QR Code": event.strCode,
+      LastScanned: event.dtLastScanned_at || "", // Use an empty string if null
+      ScaneCount: event.intScaneCount,
+      Created_at: new Date(event.dtCreated_at).toLocaleString(), // Format the date
+    }));
+
+    // Create the worksheet with the formatted data
+    const ws = XLSX.utils.json_to_sheet(formattedData);
+
+    // Create a new workbook
     const wb = XLSX.utils.book_new();
+
+    // Append the worksheet to the workbook
     XLSX.utils.book_append_sheet(wb, ws, "QR Codes");
+
+    // Write the workbook to a file
     XLSX.writeFile(wb, "QRCode_Export.xlsx");
   };
 
@@ -106,34 +156,9 @@ function Event({ authData }) {
     }
   }, []);
 
-  // const handlePrintQRCode = async (id, strCode) => {
-  //   setLoading(id); // Set loading state
-
-  //   // Render the QR code to a canvas dynamically
-  //   const qrCodeCanvas = document.createElement("canvas");
-  //   QRCode.toCanvas(
-  //     qrCodeCanvas,
-  //     strCode,
-  //     { errorCorrectionLevel: "M", scale: 4 },
-  //     (error) => {
-  //       if (error) {
-  //         console.error("QR Code generation error:", error);
-  //         return;
-  //       }
-
-  //       // Display the QR code canvas in the UI (for example, in a modal or a specific div)
-  //       const qrCodeContainer = document.getElementById("qrCodeContainer");
-  //       qrCodeContainer.innerHTML = ""; // Clear previous QR code
-  //       qrCodeContainer.appendChild(qrCodeCanvas);
-
-  //       // Reset loading state
-  //       setLoading(null);
-  //     }
-  //   );
-  // };
-
-  const handlePrintQRCode = async (id, strCode) => {
+  const handleQrCodePrint = async (id, strCode) => {
     setLoading(id); // Set loading state
+    setIsModalOpen(true); // Open the modal
 
     // Render the QR code to a canvas dynamically
     const qrCodeCanvas = document.createElement("canvas");
@@ -147,34 +172,19 @@ function Event({ authData }) {
           return;
         }
 
-        // Display the QR code canvas in the UI
-        const qrCodeContainer = document.getElementById("qrCodeContainer");
-        qrCodeContainer.innerHTML = ""; // Clear previous QR code
-        qrCodeContainer.appendChild(qrCodeCanvas);
-
-        // Add print and download buttons
-        const optionsContainer = document.getElementById("qrCodeOptions");
-        optionsContainer.innerHTML = `
-        <button id="printQR" class="btn btn-success me-2">Print</button>
-        <button id="downloadQR" class="btn btn-primary">Download</button>
-      `;
-
-        // Attach print and download functionality
-        document.getElementById("printQR").onclick = () =>
-          printQRCode(qrCodeCanvas);
-        document.getElementById("downloadQR").onclick = () =>
-          downloadQRCode(qrCodeCanvas, strCode);
-
-        // Reset loading state
-        setLoading(null);
+        // Convert canvas to an image URL and set it to the state
+        const qrCodeImageUrl = qrCodeCanvas.toDataURL("image/png");
+        setQrCodeData(qrCodeImageUrl); // Set the image URL for display
+        setLoading(null); // Reset loading state
       }
     );
   };
+
   // Print the QR code
-  const printQRCode = (canvas) => {
+  const printQRCode = (imageUrl) => {
     const win = window.open("", "Print QR Code");
     win.document.write("<html><body>");
-    win.document.body.appendChild(canvas);
+    win.document.write(`<img src="${imageUrl}" />`);
     win.document.write("</body></html>");
     win.document.close();
     win.focus();
@@ -183,38 +193,60 @@ function Event({ authData }) {
   };
 
   // Download the QR code as an image
-  const downloadQRCode = (canvas, strCode) => {
+  const downloadQRCode = (imageUrl, strCode) => {
     const link = document.createElement("a");
-    link.href = canvas.toDataURL("image/png");
+    link.href = imageUrl;
     link.download = `${strCode}_qr_code.png`;
     link.click();
   };
-
-  // Generate and download as PDF
-  const downloadAsPDF = (canvas, strCode) => {
-    const pdf = new jsPDF();
-    const imgData = canvas.toDataURL("image/png");
-    pdf.addImage(imgData, "PNG", 10, 10, 50, 50); // Adjust size and position
-    pdf.save(`${strCode}_qr_code.pdf`);
-  };
-
   return (
     <div className="container mt-5">
-      <h1 className="mb-4">QR_Code List</h1>
+      <h1 className="mb-4">QR Code List</h1>
 
-      <div
-        id="qrCodeContainer"
-        style={{ textAlign: "center", marginTop: "20px" }}
+      {/* Modal to display the QR Code and options */}
+      <Modal
+        isOpen={isModalOpen}
+        onRequestClose={() => setIsModalOpen(false)}
+        contentLabel="QR Code Modal"
+        ariaHideApp={false}
+        style={{
+          content: {
+            width: "50%",
+            margin: "auto",
+            padding: "20px",
+            textAlign: "center",
+          },
+        }}
       >
-        {/* QR code will be displayed here */}
-      </div>
+        <h2>QR Code</h2>
+        <div style={{ position: "relative", display: "inline-block" }}>
+          {qrCodeData && <img src={qrCodeData} alt="QR Code" />}
+        </div>
 
-      <div
-        id="qrCodeOptions"
-        style={{ textAlign: "center", marginTop: "10px" }}
-      ></div>
+        <div style={{ marginTop: "20px" }}>
+          <button
+            onClick={() => printQRCode(qrCodeData)}
+            className="btn btn-success me-2"
+          >
+            Print
+          </button>
+          <button
+            onClick={() => downloadQRCode(qrCodeData, "sample123")}
+            className="btn btn-primary"
+          >
+            Download
+          </button>
+        </div>
 
-      <div>{/* QR Code Modal */}</div>
+        <button
+          onClick={() => setIsModalOpen(false)}
+          style={{ position: "absolute", top: "10px", right: "10px" }}
+        >
+          &times; Close
+        </button>
+      </Modal>
+
+      {/* Example QR code generation */}
 
       {/* Search Bar */}
       <div className="d-flex justify-content-between align-items-center mb-3">
@@ -225,20 +257,26 @@ function Event({ authData }) {
             className="form-control me-2"
             value={searchCode}
             onChange={(e) => setSearchCode(e.target.value)}
+            style={{ flex: 1 }}
           />
-          <input
-            type="date"
+          <DatePicker
             className="form-control"
-            value={searchDate}
-            onChange={(e) => setSearchDate(e.target.value)}
+            selected={searchDate} // Make sure 'searchDate' is a Date object
+            onChange={(date) => setSearchDate(date)} // 'date' is the selected Date object
+            dateFormat="dd/MM/yyyy"
+            placeholderText="DD/MM/YYYY"
+            isClearable
+            required
+            style={{ flex: 1 }}
           />
         </div>
+
         <div className="d-flex ">
           <button onClick={handleExcle} className="btn btn-primary me-2">
             Export Excel
           </button>
 
-          <Link href="/qr_Codes/add" className="btn btn-primary">
+          <Link href="/qr_code/add" className="btn btn-primary">
             Generated QR
           </Link>
         </div>
@@ -255,7 +293,7 @@ function Event({ authData }) {
               QR Code
             </th>
             <th style={{ textAlign: "center", verticalAlign: "middle" }}>
-              Generated QR
+              Print
             </th>
             <th style={{ textAlign: "center", verticalAlign: "middle" }}>
               Actions
@@ -263,60 +301,74 @@ function Event({ authData }) {
           </tr>
         </thead>
         <tbody>
-          {currentEvents.map((event, index) => {
-            const globalIndex = indexOfFirstEvent + index + 1;
+          {currentEvents.length === 0 ? (
+            <tr>
+              <td colSpan="5" style={{ textAlign: "center" }}>
+                No data found
+              </td>
+            </tr>
+          ) : (
+            currentEvents.map((event, index) => {
+              const globalIndex = indexOfFirstEvent + index + 1;
 
-            return (
-              <tr key={event.intID}>
-                <td>{globalIndex}</td>
-                <td>{format(new Date(event.dtCreated_at), "dd-MM-yyyy")}</td>
-                <td>{event.strCode}</td>
-                <td style={{ textAlign: "center", verticalAlign: "middle" }}>
-                  <button
-                    className="btn btn-primary btn-sm me-2"
-                    onClick={() =>
-                      handlePrintQRCode(event.intID, event.strCode)
-                    }
-                    disabled={loading === event.intID}
-                  >
-                    <FaQrcode className="me-1" />
-                    {loading === event.intID ? "Processing..." : "Genreate"}
-                  </button>
-                </td>
-                <td style={{ textAlign: "center", verticalAlign: "middle" }}>
-                  <FaTrashAlt
-                    className="text-danger"
-                    style={{ cursor: "pointer" }}
-                    onClick={() => handleDelete(event.intID)}
-                  />
-                </td>
-              </tr>
-            );
-          })}
+              return (
+                <tr key={event.intID}>
+                  <td>{globalIndex}</td>
+                  <td>{format(new Date(event.dtCreated_at), "dd-MM-yyyy")}</td>
+                  <td>{event.strCode}</td>
+                  <td style={{ textAlign: "center", verticalAlign: "middle" }}>
+                    <button
+                      className="btn btn-primary btn-sm me-2"
+                      onClick={() =>
+                        handleQrCodePrint(event.intID, event.strCode)
+                      }
+                      disabled={loading === event.intID}
+                    >
+                      <FaPrint className="me-1" />
+                      {loading === event.intID ? "Processing..." : "Print QR"}
+                    </button>
+                  </td>
+                  <td style={{ textAlign: "center", verticalAlign: "middle" }}>
+                    <FaTrashAlt
+                      className="text-danger"
+                      style={{ cursor: "pointer" }}
+                      onClick={() => handleDelete(event.intID)}
+                    />
+                  </td>
+                </tr>
+              );
+            })
+          )}
         </tbody>
       </table>
 
       {/* Pagination */}
-      <div className="d-flex justify-content-between">
-        <button
-          className="btn btn-secondary"
-          onClick={handlePreviousPage}
-          disabled={currentPage === 1}
-        >
-          Previous
-        </button>
-        <button
-          className="btn btn-secondary"
-          onClick={handleNextPage}
-          disabled={currentPage === totalPages}
-        >
-          Next
-        </button>
-      </div>
 
-      <div className="text-center mt-3">
-        Page {currentPage} of {totalPages}
-      </div>
+      {/* Render Pagination only if there is data */}
+      {currentEvents.length > 0 && (
+        <>
+          <div className="d-flex justify-content-between">
+            <button
+              className="btn btn-secondary"
+              onClick={handlePreviousPage}
+              disabled={currentPage === 1}
+            >
+              Previous
+            </button>
+            <button
+              className="btn btn-secondary"
+              onClick={handleNextPage}
+              disabled={currentPage === totalPages}
+            >
+              Next
+            </button>
+          </div>
+
+          <div className="text-center mt-3">
+            Page {currentPage} of {totalPages}
+          </div>
+        </>
+      )}
     </div>
   );
 }

@@ -93,6 +93,10 @@ td {
 button.btn.btn-secondary {
   background-color: #0d6efd;
 }
+.equal-width-input {
+  width: 100%;
+}
+
 /* Sidebar styles */
 .sidebar {
   width: 255px;
