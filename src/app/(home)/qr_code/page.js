@@ -13,12 +13,13 @@ import { QRCodeCanvas } from "qrcode.react";
 import { useQRCode } from "next-qrcode";
 import { useRef } from "react";
 import QRCode from "qrcode";
-import withAuth from "@/components/HOC"; // Import the HOC
+
 import * as XLSX from "xlsx"; // Import XLSX for Excel export
-import Image from "next/image";
+
 import Modal from "react-modal";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
+import withAuth from "@/components/Hoc";
 // React Modal custom styles
 const customStyles = {
   content: {

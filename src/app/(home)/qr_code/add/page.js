@@ -3,15 +3,15 @@ import { useState } from "react";
 import QRCode from "qrcode.react";
 import { useRouter } from "next/navigation";
 import { useAppContext } from "@/context/AppContext";
+import * as XLSX from "xlsx";
 
 export default function AddEvent() {
   const [count, setCount] = useState("");
   const [qrCodes, setQrCodes] = useState([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const { event, eventDisplay, qrCode, qrCodDisplay } = useAppContext();
+  const { qrCodDisplay } = useAppContext();
   const router = useRouter();
 
-  // Function to generate unique 10-character alphanumeric codes
   const generateUniqueCodes = (length) => {
     const characters =
       "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
@@ -31,14 +31,10 @@ export default function AddEvent() {
       return;
     }
 
-    // Generate unique QR codes
     const generatedCodes = generateUniqueCodes(number);
     setQrCodes(generatedCodes);
 
-    // Prepare data for API request
-    const requestBody = {
-      strCode: generatedCodes, // Use the array of codes directly
-    };
+    const requestBody = { strCode: generatedCodes };
 
     try {
       setIsSubmitting(true);
@@ -47,9 +43,9 @@ export default function AddEvent() {
         {
           method: "POST",
           headers: {
-            "Content-Type": "application/json", // Set content type to JSON
+            "Content-Type": "application/json",
           },
-          body: JSON.stringify(requestBody), // Use JSON.stringify to prepare the payload
+          body: JSON.stringify(requestBody),
         }
       );
 
@@ -57,8 +53,6 @@ export default function AddEvent() {
         alert("QR codes submitted successfully!");
         qrCodDisplay();
         setCount("");
-        setQrCodes([]);
-        router.push("/qr_code"); // Navigate to another page if needed
       } else {
         const error = await response.json();
         alert(`Error: ${error.message}`);
@@ -70,24 +64,32 @@ export default function AddEvent() {
       setIsSubmitting(false);
     }
   };
+
   const handleClear = () => {
     setCount("");
     setQrCodes([]);
   };
 
   const handleCancel = () => {
-    router.push("/qr_code");
+    router.push("/qr_Codes");
+  };
+
+  const exportToExcel = () => {
+    const worksheet = XLSX.utils.json_to_sheet(
+      qrCodes.map((code, index) => ({ ID: index + 1, QRCode: code }))
+    );
+    const workbook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(workbook, worksheet, "QR Codes");
+    XLSX.writeFile(workbook, "QRCodeData.xlsx");
   };
 
   return (
-    <div className="d-flex justify-content-center align-items-center  mt-5  ">
-      <br></br>
+    <div className="d-flex justify-content-center align-items-center mt-5">
       <div
         className="p-4 border rounded"
         style={{
           maxWidth: "700px",
           width: "100%",
-          height: "300px",
           background: "white",
         }}
       >
@@ -111,22 +113,17 @@ export default function AddEvent() {
             />
           </div>
           <div className="d-flex justify-content-between align-items-center">
-            {/* Left-aligned button */}
-            <div className="box_btn">
-              <button
-                type="submit"
-                className="btn btn-primary"
-                disabled={isSubmitting}
-              >
-                {isSubmitting ? "Submitting..." : "Generate"}
-              </button>
-            </div>
-
-            {/* Right-aligned buttons */}
-            <div className="box_btn d-flex gap-2">
+            <button
+              type="submit"
+              className="btn btn-primary"
+              disabled={isSubmitting}
+            >
+              {isSubmitting ? "Submitting..." : "Generate"}
+            </button>
+            <div className="d-flex gap-2">
               <button
                 type="button"
-                className="btn btn-dark me-2" /* Adds space to the right of Clear */
+                className="btn btn-dark"
                 onClick={handleClear}
               >
                 Clear
@@ -141,6 +138,37 @@ export default function AddEvent() {
             </div>
           </div>
         </form>
+
+        {qrCodes.length > 0 && (
+          <div className="mt-4">
+            <div className="d-flex justify-content-between align-items-center">
+              <h2 className="mb-3">Generated QR Codes</h2>
+              <button
+                type="button"
+                className="btn btn-success btn-sm"
+                onClick={exportToExcel}
+              >
+                Export to Excel
+              </button>
+            </div>
+            <table className="table table-bordered text-center">
+              <thead>
+                <tr>
+                  <th>Sr#</th>
+                  <th>QR Code</th>
+                </tr>
+              </thead>
+              <tbody>
+                {qrCodes.map((code, index) => (
+                  <tr key={index}>
+                    <td>{index + 1}</td>
+                    <td>{code}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
       </div>
     </div>
   );
