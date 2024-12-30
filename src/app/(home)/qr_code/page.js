@@ -13,7 +13,7 @@ import { QRCodeCanvas } from "qrcode.react";
 import { useQRCode } from "next-qrcode";
 import { useRef } from "react";
 import QRCode from "qrcode";
-
+import Image from "next/image";
 import * as XLSX from "xlsx"; // Import XLSX for Excel export
 
 import Modal from "react-modal";
@@ -50,16 +50,6 @@ function Event({ authData }) {
   const [qrCodeData, setQrCodeData] = useState(null); // QR code data for the modal
   const eventsPerPage = 10;
 
-  // Filter events based on search criteria
-  // const filteredEvents = qrCode.filter((event) => {
-  //   const matchesCode = event.strCode
-  //     .toLowerCase()
-  //     .includes(searchCode.toLowerCase());
-  //   const matchesDate =
-  //     searchDate === "" ||
-  //     format(new Date(event.dtCreated_at), "yyyy-MM-dd").includes(searchDate);
-  //   return matchesCode && matchesDate;
-  // });
   const filteredEvents = qrCode.filter((event) => {
     const matchesCode = event.strCode
       .toLowerCase()
@@ -221,7 +211,16 @@ function Event({ authData }) {
       >
         <h2>QR Code</h2>
         <div style={{ position: "relative", display: "inline-block" }}>
-          {qrCodeData && <img src={qrCodeData} alt="QR Code" />}
+          {/* {qrCodeData && <img src={qrCodeData} alt="QR Code" />} */}
+          {qrCodeData && (
+            <Image
+              src={qrCodeData}
+              alt="QR Code"
+              width={200} // Specify a width
+              height={200} // Specify a height
+              layout="intrinsic" // Maintain aspect ratio
+            />
+          )}
         </div>
 
         <div style={{ marginTop: "20px" }}>

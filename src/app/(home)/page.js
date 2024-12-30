@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useAppContext } from "@/context/AppContext";
-import withAuth from "@/components/Hoc";
+import withAuth from "@/components/Hoc"; // Import the HOC
 
 function Dashboard() {
   const { event, participant, getTokenAndSetUserId } = useAppContext();

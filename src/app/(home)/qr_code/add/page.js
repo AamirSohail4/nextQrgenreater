@@ -4,8 +4,9 @@ import QRCode from "qrcode.react";
 import { useRouter } from "next/navigation";
 import { useAppContext } from "@/context/AppContext";
 import * as XLSX from "xlsx";
+import withAuth from "@/components/Hoc";
 
-export default function AddEvent() {
+function AddQRCode() {
   const [count, setCount] = useState("");
   const [qrCodes, setQrCodes] = useState([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -71,7 +72,7 @@ export default function AddEvent() {
   };
 
   const handleCancel = () => {
-    router.push("/qr_Codes");
+    router.push("/qr_code");
   };
 
   const exportToExcel = () => {
@@ -173,3 +174,4 @@ export default function AddEvent() {
     </div>
   );
 }
+export default withAuth(AddQRCode, ["1"]);

@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation"; // Using next/navigation for router
 import { useEffect, useState } from "react";
 
 const withAuth = (WrappedComponent, allowedRoles) => {
-  return (props) => {
+  const AuthHOC = (props) => {
     const { authData } = useAuth();
     const router = useRouter();
     const [isMounted, setIsMounted] = useState(false); // State to check if client-side rendering has mounted
@@ -23,7 +23,7 @@ const withAuth = (WrappedComponent, allowedRoles) => {
           router.push("/auth/login"); // Redirect to login if unauthorized
         }
       }
-    }, [authData, isMounted, router, allowedRoles]);
+    }, [authData, isMounted, router]);
 
     // Show a loading state until client-side rendering has mounted
     if (
@@ -36,6 +36,13 @@ const withAuth = (WrappedComponent, allowedRoles) => {
 
     return <WrappedComponent {...props} />;
   };
+
+  // Set a display name for the HOC
+  AuthHOC.displayName = `WithAuth(${
+    WrappedComponent.displayName || WrappedComponent.name || "Component"
+  })`;
+
+  return AuthHOC;
 };
 
 export default withAuth;
