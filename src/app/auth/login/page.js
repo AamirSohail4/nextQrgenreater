@@ -30,10 +30,10 @@ export default function Page() {
 
     try {
       const data = new FormData();
-      data.append("user_name", formData.user_name);
+      data.append("email", formData.user_name);
       data.append("password", formData.password);
 
-      const res = await fetch("http://51.112.24.26:5001/api/users/userLogin", {
+      const res = await fetch("http://localhost:5000/api/users/userLogin", {
         method: "POST",
         body: data,
       });
@@ -44,7 +44,7 @@ export default function Page() {
         alert(response.message);
         localStorage.setItem("token", response.token);
 
-        router.push("/dashboard");
+        router.push("/");
       } else {
         alert(response.message || "An error occurred. Please try again."); // Show error message
       }
@@ -64,16 +64,16 @@ export default function Page() {
         style={{ width: "400px", borderRadius: "10px" }}
       >
         <div className="card-body p-4">
-          <h4 className="text-center mb-4 text-primary fw-bold">
-            Welcome to Event Registration
-          </h4>
+          {/* <h4 className="text-center mb-4 text-primary fw-bold">
+            Welcome to Admin Panel
+          </h4> */}
           <div className="text-center mb-4">
             <Image
-              src="/images/logo1.jpg"
+              src="/images/logo4.PNG"
               alt="eventRegistration"
-              width={100} // Width in pixels
-              height={100} // Height in pixels, you can adjust this as needed
-              style={{ width: "100px", height: "auto" }} // Ensures responsive sizing
+              width={230} // Width in pixels
+              height={200} // Height in pixels, you can adjust this as needed
+              // style={{ width: "100px", height: "auto" }} // Ensures responsive sizing
               className="img-fluid" // Bootstrap class for responsiveness
             />
           </div>
@@ -133,7 +133,7 @@ export default function Page() {
             className="text-center mt-4 text-muted"
             style={{ fontSize: "12px" }}
           >
-            Copyright © 2024 | Event Registration | All Rights Reserved
+            Copyright © 2024 | QR Code Generater | All Rights Reserved
           </p>
         </div>
       </div>

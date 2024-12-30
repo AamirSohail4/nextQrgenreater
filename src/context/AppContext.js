@@ -11,9 +11,21 @@ export const AppProvider = ({ children }) => {
   const [userId, setUserId] = useState(null);
   const [roleId, setRoleId] = useState(null); // State to hold userId
   const [event, setEvent] = useState([]);
+  const [qrCode, setQRCode] = useState([]);
   const [eventParticipant, setEventParticipant] = useState([]);
   const [eventSumary, setEventSumary] = useState([]);
   const [participant, setParticipant] = useState([]);
+
+  //QR Generater Display
+  const qrCodDisplay = async () => {
+    try {
+      const response = await fetch("http://localhost:5000/api/codes/qr_codes");
+      const qrtItem = await response.json();
+      setQRCode(qrtItem?.data);
+    } catch (error) {
+      console.log("Error fetching events", error);
+    }
+  };
 
   // Fetch all Events
   const eventDisplay = async () => {
@@ -82,10 +94,10 @@ export const AppProvider = ({ children }) => {
       console.log("Error fetching events", error);
     }
   };
-  // console.log("that is a eventSumary==========>", eventSumary);
 
   useEffect(() => {
-    getTokenAndSetUserId(); // Decode the token when the component mounts
+    getTokenAndSetUserId();
+    qrCodDisplay();
     eventDisplay(); // Fetch events
     displayParticipant(); // Fetch participants
     eventParticipantDisplay();
@@ -97,6 +109,8 @@ export const AppProvider = ({ children }) => {
       value={{
         roleId,
         userId,
+        qrCode,
+        qrCodDisplay,
         event,
         eventDisplay,
         participant,

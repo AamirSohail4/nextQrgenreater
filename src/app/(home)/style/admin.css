@@ -95,7 +95,7 @@ button.btn.btn-secondary {
 }
 /* Sidebar styles */
 .sidebar {
-  width: 200px;
+  width: 255px;
   background-color: #182124;
   padding-top: 20px;
   position: fixed;
@@ -112,9 +112,10 @@ button.btn.btn-secondary {
 }
 
 .sidebar-logo {
-  width: 50px;
-  height: 50px;
+  /* width: 50px; */
+  /* height: 50px; */
   object-fit: cover;
+  margin-top: 31px;
 }
 
 .dashboard-title {
@@ -163,6 +164,7 @@ button.btn.btn-secondary {
   padding: 20px;
   width: 100%;
   min-height: 100vh;
+  background: #fbfbfb;
 }
 
 .navbar {
