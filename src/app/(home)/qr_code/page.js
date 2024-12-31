@@ -95,7 +95,7 @@ function Event({ authData }) {
     if (confirmDelete) {
       try {
         const response = await fetch(
-          `https://51.112.24.26:5003/api/codes/delete/${id}`,
+          `http://51.112.24.26:5003/api/codes/delete/${id}`,
           {
             method: "DELETE",
           }

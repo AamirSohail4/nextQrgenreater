@@ -25,7 +25,9 @@ function Dashboard() {
         </div>
         <div className="card">
           <h4 className="card_title">QR Codes Scanned</h4>
-          <p className="card_description">Total QR Codes scanned: 70</p>
+          <p className="card_description">
+            Total QR Codes scanned. {qrCode?.length}
+          </p>
         </div>
       </div>
     </main>

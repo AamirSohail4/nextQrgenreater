@@ -19,7 +19,9 @@ export const AppProvider = ({ children }) => {
   //QR Generater Display
   const qrCodDisplay = async () => {
     try {
-      const response = await fetch("http://localhost:5000/api/codes/qr_codes");
+      const response = await fetch(
+        "http://51.112.24.26:5003/api/codes/qr_codes"
+      );
       const qrtItem = await response.json();
       setQRCode(qrtItem?.data);
     } catch (error) {
@@ -30,9 +32,7 @@ export const AppProvider = ({ children }) => {
   // Fetch all Events
   const eventDisplay = async () => {
     try {
-      const response = await fetch(
-        "https://51.112.24.26:5003/api/event/getAll"
-      );
+      const response = await fetch("http://51.112.24.26:5003/api/event/getAll");
       const eventItem = await response.json();
       setEvent(eventItem?.data);
     } catch (error) {
@@ -44,7 +44,7 @@ export const AppProvider = ({ children }) => {
   const displayParticipant = async () => {
     try {
       const response = await fetch(
-        "https://51.112.24.26:5003/api/participant/getAll"
+        "http://51.112.24.26:5003/api/participant/getAll"
       );
       const participantItem = await response.json();
       setParticipant(participantItem?.data);
@@ -75,7 +75,7 @@ export const AppProvider = ({ children }) => {
   const eventParticipantDisplay = async () => {
     try {
       const response = await fetch(
-        "https://51.112.24.26:5003/api/email/getReport"
+        "http://51.112.24.26:5003/api/email/getReport"
       );
       const getReport = await response.json();
       setEventParticipant(getReport?.data);
@@ -87,7 +87,7 @@ export const AppProvider = ({ children }) => {
   const eventParticipantSummary = async () => {
     try {
       const response = await fetch(
-        "https://51.112.24.26:5003/api/email/geteventSumary"
+        "http://51.112.24.26:5003/api/email/geteventSumary"
       );
       const eventSumary = await response.json();
 

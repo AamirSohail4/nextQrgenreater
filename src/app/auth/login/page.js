@@ -33,7 +33,7 @@ export default function Page() {
       data.append("email", formData.user_name);
       data.append("password", formData.password);
 
-      const res = await fetch("https://51.112.24.26:5003/api/users/userLogin", {
+      const res = await fetch("http://51.112.24.26:5003/api/users/userLogin", {
         method: "POST",
         body: data,
       });
