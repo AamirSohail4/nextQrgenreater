@@ -83,7 +83,7 @@ function AddQRCode() {
         ID: code.intID,
         "QR Code": code.strCode,
         "Last Scanned At": code.dtLast_scanned_at || "",
-        "Scanne Count": code.intScan_count,
+        "Scan Count": code.intScan_count,
         "Created At": new Date(code.dtCreated_at).toLocaleDateString("en-GB"),
       }))
     );
@@ -168,7 +168,7 @@ function AddQRCode() {
                   <th>QR Code</th>
                   <th>Created At</th>
                   <th>Last Scanned At</th>
-                  <th>Scanne Count</th>
+                  <th>Scan Count</th>
                 </tr>
               </thead>
               <tbody>

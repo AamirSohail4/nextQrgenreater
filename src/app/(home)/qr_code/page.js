@@ -141,7 +141,7 @@ function Event({ authData }) {
       ID: event.intID,
       "QR Code": event.strCode,
       "Last Scanned At": event.dtLastScanned_at || "",
-      "Scanne Count": event.intScaneCount,
+      "Scan Count": event.intScaneCount,
       "Created At": new Date(event.dtCreated_at).toLocaleString(),
     }));
 
