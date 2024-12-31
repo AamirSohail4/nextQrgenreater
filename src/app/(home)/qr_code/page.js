@@ -50,12 +50,25 @@ function Event({ authData }) {
   const [qrCodeData, setQrCodeData] = useState(null); // QR code data for the modal
   const eventsPerPage = 10;
 
+  // const filteredEvents = qrCode.filter((event) => {
+  //   const matchesCode = event.strCode
+  //     .toLowerCase()
+  //     .includes(searchCode.toLowerCase());
+
+  //   // Ensure searchDate is a valid Date object before comparing
+  //   const matchesDate =
+  //     !searchDate || // If searchDate is empty, don't filter by date
+  //     format(new Date(event.dtCreated_at), "yyyy-MM-dd") ===
+  //       format(searchDate, "yyyy-MM-dd");
+
+  //   return matchesCode && matchesDate;
+  // });
+
   const filteredEvents = qrCode.filter((event) => {
     const matchesCode = event.strCode
       .toLowerCase()
       .includes(searchCode.toLowerCase());
 
-    // Ensure searchDate is a valid Date object before comparing
     const matchesDate =
       !searchDate || // If searchDate is empty, don't filter by date
       format(new Date(event.dtCreated_at), "yyyy-MM-dd") ===
@@ -63,6 +76,11 @@ function Event({ authData }) {
 
     return matchesCode && matchesDate;
   });
+
+  // Reset pagination when filters change
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [searchCode, searchDate]);
 
   const sortedEvents = [...filteredEvents].sort((a, b) => a.id - b.id);
 
@@ -120,19 +138,16 @@ function Event({ authData }) {
     // Transform the data to match the desired headings and format
     const formattedData = filteredEvents.map((event, index) => ({
       Sr: index + 1, // Add a serial number
+      ID: event.intID,
       "QR Code": event.strCode,
-      LastScanned: event.dtLastScanned_at || "", // Use an empty string if null
-      ScaneCount: event.intScaneCount,
-      Created_at: new Date(event.dtCreated_at).toLocaleString(), // Format the date
+      "Last Scanned At": event.dtLastScanned_at || "",
+      "Scanne Count": event.intScaneCount,
+      "Created At": new Date(event.dtCreated_at).toLocaleString(),
     }));
 
     // Create the worksheet with the formatted data
     const ws = XLSX.utils.json_to_sheet(formattedData);
-
-    // Create a new workbook
     const wb = XLSX.utils.book_new();
-
-    // Append the worksheet to the workbook
     XLSX.utils.book_append_sheet(wb, ws, "QR Codes");
 
     // Write the workbook to a file
@@ -261,8 +276,8 @@ function Event({ authData }) {
           />
           <DatePicker
             className="form-control"
-            selected={searchDate} // Make sure 'searchDate' is a Date object
-            onChange={(date) => setSearchDate(date)} // 'date' is the selected Date object
+            selected={searchDate}
+            onChange={(date) => setSearchDate(date)}
             dateFormat="dd/MM/yyyy"
             placeholderText="DD/MM/YYYY"
             isClearable
@@ -277,7 +292,7 @@ function Event({ authData }) {
           </button>
 
           <Link href="/qr_code/add" className="btn btn-primary">
-            Generated QR
+            Generate QR
           </Link>
         </div>
       </div>
@@ -286,12 +301,14 @@ function Event({ authData }) {
         <thead className="table-dark">
           <tr>
             <th style={{ textAlign: "center", verticalAlign: "middle" }}>Sr</th>
+            <th style={{ textAlign: "center", verticalAlign: "middle" }}>ID</th>
             <th style={{ textAlign: "center", verticalAlign: "middle" }}>
-              Created at
+              Created At
             </th>
             <th style={{ textAlign: "center", verticalAlign: "middle" }}>
               QR Code
             </th>
+
             <th style={{ textAlign: "center", verticalAlign: "middle" }}>
               Print
             </th>
@@ -314,6 +331,7 @@ function Event({ authData }) {
               return (
                 <tr key={event.intID}>
                   <td>{globalIndex}</td>
+                  <td>{event.intID}</td>
                   <td>{format(new Date(event.dtCreated_at), "dd-MM-yyyy")}</td>
                   <td>{event.strCode}</td>
                   <td style={{ textAlign: "center", verticalAlign: "middle" }}>

@@ -27,13 +27,12 @@ function AddQRCode() {
     e.preventDefault();
 
     const number = parseInt(count, 10);
-    if (isNaN(number) || number <= 0 || number > 100) {
+    if (isNaN(number) || number <= 0 || number > 500) {
       alert("Please enter a valid number between 1 and 100.");
       return;
     }
 
     const generatedCodes = generateUniqueCodes(number);
-    setQrCodes(generatedCodes);
 
     const requestBody = { strCode: generatedCodes };
 
@@ -51,7 +50,9 @@ function AddQRCode() {
       );
 
       if (response.ok) {
+        const responseData = await response.json();
         alert("QR codes submitted successfully!");
+        setQrCodes(responseData.data);
         qrCodDisplay();
         setCount("");
       } else {
@@ -77,11 +78,18 @@ function AddQRCode() {
 
   const exportToExcel = () => {
     const worksheet = XLSX.utils.json_to_sheet(
-      qrCodes.map((code, index) => ({ ID: index + 1, QRCode: code }))
+      qrCodes.map((code, index) => ({
+        "Sr#": index + 1,
+        ID: code.intID,
+        "QR Code": code.strCode,
+        "Last Scanned At": code.dtLast_scanned_at || "",
+        "Scanne Count": code.intScan_count,
+        "Created At": new Date(code.dtCreated_at).toLocaleDateString("en-GB"),
+      }))
     );
     const workbook = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(workbook, worksheet, "QR Codes");
-    XLSX.writeFile(workbook, "QRCodeData.xlsx");
+    XLSX.utils.book_append_sheet(workbook, worksheet, "QR Code");
+    XLSX.writeFile(workbook, "QRCode_Export.xlsx");
   };
 
   return (
@@ -110,7 +118,7 @@ function AddQRCode() {
               onChange={(e) => setCount(e.target.value)}
               required
               min="1"
-              max="100"
+              max="500"
             />
           </div>
           <div className="d-flex justify-content-between align-items-center">
@@ -155,15 +163,31 @@ function AddQRCode() {
             <table className="table table-bordered text-center">
               <thead>
                 <tr>
-                  <th>Sr#</th>
+                  <th>Sr</th>
+                  <th>ID</th>
                   <th>QR Code</th>
+                  <th>Created At</th>
+                  <th>Last Scanned At</th>
+                  <th>Scanne Count</th>
                 </tr>
               </thead>
               <tbody>
                 {qrCodes.map((code, index) => (
-                  <tr key={index}>
+                  <tr key={code.intID}>
                     <td>{index + 1}</td>
-                    <td>{code}</td>
+                    <td>{code.intID}</td>
+                    <td>{code.strCode}</td>
+                    <td>
+                      {new Date(code.dtCreated_at).toLocaleDateString("en-GB")}
+                    </td>
+                    <td>
+                      {code.dtLast_scanned_at
+                        ? new Date(code.dtLast_scanned_at).toLocaleDateString(
+                            "en-GB"
+                          )
+                        : "Not Scanned"}
+                    </td>
+                    <td>{code.intScan_count}</td>
                   </tr>
                 ))}
               </tbody>
@@ -174,4 +198,5 @@ function AddQRCode() {
     </div>
   );
 }
+
 export default withAuth(AddQRCode, ["1"]);
