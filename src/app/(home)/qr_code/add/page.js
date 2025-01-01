@@ -81,7 +81,7 @@ function AddQRCode() {
       qrCodes.map((code, index) => ({
         "Sr#": index + 1,
         ID: code.intID,
-        "QR Code": code.strCode,
+        "QR Code": `http://51.112.24.26:5004/qr_code_validator/${code.strCode}`,
         "Last Scanned At": code.dtLast_scanned_at || "",
         "Scan Count": code.intScan_count,
         "Created At": new Date(code.dtCreated_at).toLocaleDateString("en-GB"),
@@ -97,7 +97,7 @@ function AddQRCode() {
       <div
         className="p-4 border rounded"
         style={{
-          maxWidth: "700px",
+          maxWidth: "780px",
           width: "100%",
           background: "white",
         }}
@@ -176,7 +176,7 @@ function AddQRCode() {
                   <tr key={code.intID}>
                     <td>{index + 1}</td>
                     <td>{code.intID}</td>
-                    <td>{code.strCode}</td>
+                    <td>{`http://51.112.24.26:5004/qr_code_validator/${code.strCode}`}</td>
                     <td>
                       {new Date(code.dtCreated_at).toLocaleDateString("en-GB")}
                     </td>
