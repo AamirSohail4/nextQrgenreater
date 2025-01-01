@@ -32,7 +32,7 @@ function QRcode_validator({ params }) {
 
   return (
     <div className="container mt-5">
-      <h1 className="mb-4">QR Code Validate Here</h1>
+      <h1 className="mb-4">Welcome to QR Code Validater </h1>
 
       {/* Display the dynamic strCode */}
       <p>QR Code: {strCode}</p>
