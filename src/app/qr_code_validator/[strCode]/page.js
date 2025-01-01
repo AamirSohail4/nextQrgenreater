@@ -1,57 +1,133 @@
 "use client";
 
-import { useAppContext } from "@/context/AppContext";
 import { useState, useEffect, Suspense } from "react";
-import { useRouter } from "next/navigation";
-import { use } from "react"; // Import use from React
+import React from "react";
 
-function QRcode_validator({ params }) {
-  const {
-    event,
-    userId,
-    eventDisplay,
-    eventParticipantDisplay,
-    eventParticipantSummary,
-    roleId,
-  } = useAppContext();
-
-  const router = useRouter();
+function QRcodeValidator({ params }) {
   const [strCode, setStrCode] = useState(null);
-  const [fromDate, setFromDate] = useState(null);
-  const [toDate, setToDate] = useState(null);
+  const [validationMessage, setValidationMessage] = useState(null);
   const [loading, setLoading] = useState(true);
 
-  // Use React.use() to unwrap the params object
-  const { strCode: dynamicStrCode } = use(params); // Unwrap the params with use()
-
   useEffect(() => {
-    if (dynamicStrCode) {
-      setStrCode(dynamicStrCode);
-      setLoading(false);
-      console.log(`Dynamic Code: ${dynamicStrCode}`);
+    async function unwrapParams() {
+      const unwrappedParams = await params; // Unwrap params
+      const { strCode: dynamicStrCode } = unwrappedParams || {};
+      if (dynamicStrCode) {
+        setStrCode(dynamicStrCode);
+        fetchValidationStatus(dynamicStrCode);
+      }
     }
-  }, [dynamicStrCode]);
+    unwrapParams();
+  }, [params]);
+
+  const fetchValidationStatus = async (code) => {
+    try {
+      setLoading(true);
+      const res = await fetch(
+        `http://51.112.24.26:5003/api/codes/validate_qrcode/${code}`
+      );
+      const data = await res.json();
+
+      if (res.ok) {
+        const lastScannedDate = data?.data?.dtLast_Scanned_at
+          ? new Intl.DateTimeFormat("en-GB", {
+              day: "2-digit",
+              month: "2-digit",
+              year: "numeric",
+              hour: "2-digit",
+              minute: "2-digit",
+              hour12: true, // Enable AM/PM format
+            }).format(new Date(data.data.dtLast_Scanned_at))
+          : "Not Available";
+
+        setValidationMessage({
+          status: "success",
+          scannedCount: data?.data?.intScan_Count || 0,
+          lastScanned: lastScannedDate,
+        });
+      } else {
+        setValidationMessage({
+          status: "error",
+          error: data.error || "The code is invalid.",
+        });
+      }
+    } catch (error) {
+      setValidationMessage({
+        status: "error",
+        error: "Could not validate the code.",
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
-    <div className="container mt-5">
-      <h1 className="mb-4">QR Code Validate Here</h1>
+    <div
+      className="d-flex flex-column align-items-center justify-content-center"
+      style={{
+        height: "100vh",
+        backgroundColor: "#f8f9fa",
+      }}
+    >
+      <div
+        className="card shadow-lg"
+        style={{
+          width: "90vw",
+          maxWidth: "800px",
+          padding: "20px",
+          borderRadius: "10px",
+          backgroundColor: "#fff",
+        }}
+      >
+        <h1 className="mb-4 text-center text-primary">QR Code Validation</h1>
 
-      {loading ? (
-        <div>Loading...</div>
-      ) : (
-        <div>
-          <p>Dynamic Code: {strCode}</p>
-          {/* Other logic goes here */}
-        </div>
-      )}
+        {loading ? (
+          <div className="text-center">
+            <div className="spinner-border text-primary" role="status">
+              <span className="sr-only">Loading...</span>
+            </div>
+          </div>
+        ) : (
+          <div className="text-center">
+            <p className="lead mb-3">
+              {strCode ? `QR Code: ${strCode}` : "No QR code scanned"}
+            </p>
+            {validationMessage?.status === "success" ? (
+              <div className="alert alert-success text-start">
+                <p>
+                  <strong>✅ Success:</strong> The code is valid.
+                </p>
+                <p>
+                  <strong>Scanned Count:</strong>{" "}
+                  <span className="text-success">
+                    {validationMessage.scannedCount}
+                  </span>
+                </p>
+                <p>
+                  <strong>Last Scanned:</strong>{" "}
+                  <span className="text-primary">
+                    {validationMessage.lastScanned}
+                  </span>
+                </p>
+              </div>
+            ) : (
+              <div className="alert alert-danger text-start">
+                <p>
+                  <strong>❌ Error:</strong> {validationMessage?.error}
+                </p>
+              </div>
+            )}
+          </div>
+        )}
+      </div>
     </div>
   );
 }
 
-export default function EditEvent({ params }) {
+export default function QRcodeValidatorPage({ params }) {
   return (
     <Suspense fallback={<div>Loading...</div>}>
-      <QRcode_validator params={params} />
+      <QRcodeValidator params={params} />
     </Suspense>
   );
 }
