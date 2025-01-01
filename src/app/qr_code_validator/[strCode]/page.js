@@ -16,28 +16,34 @@ function QRcode_validator({ params }) {
   } = useAppContext();
 
   const router = useRouter();
+  const [strCode, setStrCode] = useState(null);
   const [fromDate, setFromDate] = useState(null);
   const [toDate, setToDate] = useState(null);
   const [loading, setLoading] = useState(true);
 
   // Use React.use() to unwrap the params object
-  const { strCode } = use(params); // Unwrap the params with use()
+  const { strCode: dynamicStrCode } = use(params); // Unwrap the params with use()
 
   useEffect(() => {
-    if (strCode) {
-      console.log(`Dynamic Code: ${strCode}`);
-      // You can add more logic here, like fetching data using the `strCode` value
+    if (dynamicStrCode) {
+      setStrCode(dynamicStrCode);
+      setLoading(false);
+      console.log(`Dynamic Code: ${dynamicStrCode}`);
     }
-  }, [strCode]);
+  }, [dynamicStrCode]);
 
   return (
     <div className="container mt-5">
-      <h1 className="mb-4">Welcome to QR Code Validater </h1>
+      <h1 className="mb-4">QR Code Validate Here</h1>
 
-      {/* Display the dynamic strCode */}
-      <p>QR Code: {strCode}</p>
-
-      {/* {loading ? <div>Loading...</div> : <div>Content Loaded</div>} */}
+      {loading ? (
+        <div>Loading...</div>
+      ) : (
+        <div>
+          <p>Dynamic Code: {strCode}</p>
+          {/* Other logic goes here */}
+        </div>
+      )}
     </div>
   );
 }
