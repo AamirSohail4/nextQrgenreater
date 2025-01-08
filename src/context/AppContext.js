@@ -41,11 +41,9 @@ export const AppProvider = ({ children }) => {
   };
 
   // Fetch all Participants
-  const displayParticipant = async () => {
+  const disPlayUsers = async () => {
     try {
-      const response = await fetch(
-        "http://51.112.24.26:5003/api/participant/getAll"
-      );
+      const response = await fetch("http://51.112.24.26:5003/api/users/users");
       const participantItem = await response.json();
       setParticipant(participantItem?.data);
     } catch (error) {
@@ -101,7 +99,7 @@ export const AppProvider = ({ children }) => {
     getTokenAndSetUserId();
     qrCodDisplay();
     eventDisplay(); // Fetch events
-    displayParticipant(); // Fetch participants
+    disPlayUsers(); // Fetch participants
     eventParticipantDisplay();
     eventParticipantSummary();
   }, []);
@@ -116,7 +114,7 @@ export const AppProvider = ({ children }) => {
         event,
         eventDisplay,
         participant,
-        displayParticipant,
+        disPlayUsers,
         getTokenAndSetUserId,
         eventParticipant,
         eventParticipantDisplay,

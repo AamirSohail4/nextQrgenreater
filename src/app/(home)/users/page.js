@@ -37,8 +37,8 @@ const customStyles = {
   },
 };
 
-function Event({ authData }) {
-  const { qrCode, qrCodDisplay } = useAppContext();
+function Users({ authData }) {
+  const { qrCode, qrCodDisplay, participant, disPlayUsers } = useAppContext();
   const { Canvas } = useQRCode();
   const [loading, setLoading] = useState(null);
   const qrCodeRef = useRef(null);
@@ -50,17 +50,17 @@ function Event({ authData }) {
   const [qrCodeData, setQrCodeData] = useState(null);
   const eventsPerPage = 10;
 
-  const filteredEvents = qrCode.filter((event) => {
-    const matchesCode = event.strCode
+  const filteredEvents = participant.filter((event) => {
+    const matchesCode = event.strEmail
       .toLowerCase()
-      .includes(searchCode.toLowerCase());
+      .includes(searchCode.toLowerCase()); // Apply filter on email field
 
     const matchesDate =
       !searchDate || // If searchDate is empty, don't filter by date
       format(new Date(event.dtCreated_at), "yyyy-MM-dd") ===
         format(searchDate, "yyyy-MM-dd");
 
-    return matchesCode && matchesDate;
+    return matchesCode && matchesDate; // Return true if both match
   });
 
   // Reset pagination when filters change
@@ -93,24 +93,24 @@ function Event({ authData }) {
 
   const handleDelete = async (id) => {
     const confirmDelete = window.confirm(
-      `Are you sure you want to delete the QR Code with ID: ${id}?`
+      `Are you sure you want to delete the User with ID: ${id}?`
     );
 
     if (confirmDelete) {
       try {
         const response = await fetch(
-          `http://51.112.24.26:5003/api/codes/delete/${id}`,
+          `http://localhost:8080/api/users/users/${id}`,
           {
             method: "DELETE",
           }
         );
 
         if (response.ok) {
-          alert(`QR Code with ID: ${id} has been deleted successfully.`);
-          qrCodDisplay();
+          alert(`User with ID: ${id} has been deleted successfully.`);
+          disPlayUsers();
         } else {
           const errorData = await response.json();
-          alert(`Error: ${errorData.message || "Unable to delete QR Code."}`);
+          alert(`Error: ${errorData.message || "Unable to delete User."}`);
         }
       } catch (error) {
         console.error("Error during delete operation:", error);
@@ -124,11 +124,8 @@ function Event({ authData }) {
     // Transform the data to match the desired headings and format
     const formattedData = filteredEvents.map((event, index) => ({
       Sr: index + 1, // Add a serial number
-      ID: event.intID,
-      "QR Code": `http://51.112.24.26:5004/qr_code_validator/${event.strCode}`,
-      "Last Scanned At": event.dtLastScanned_at || "",
-      "Scan Count": event.intScaneCount,
-      "Created At": new Date(event.dtCreated_at).toLocaleString(),
+
+      strEmail: event.strEmail || "",
     }));
 
     // Create the worksheet with the formatted data
@@ -148,105 +145,9 @@ function Event({ authData }) {
     }
   }, []);
 
-  const handleQrCodePrint = async (id, strCode) => {
-    setLoading(id); // Set loading state
-    setIsModalOpen(true); // Open the modal
-
-    // Render the QR code to a canvas dynamically
-    const qrCodeCanvas = document.createElement("canvas");
-    QRCode.toCanvas(
-      qrCodeCanvas,
-      `http://51.112.24.26:5004/qr_code_validator/${strCode}`,
-
-      { errorCorrectionLevel: "M", scale: 4 },
-      (error) => {
-        if (error) {
-          console.error("QR Code generation error:", error);
-          return;
-        }
-
-        // Convert canvas to an image URL and set it to the state
-        const qrCodeImageUrl = qrCodeCanvas.toDataURL("image/png");
-        setQrCodeData(qrCodeImageUrl); // Set the image URL for display
-        setLoading(null); // Reset loading state
-      }
-    );
-  };
-
-  // Print the QR code
-  const printQRCode = (imageUrl) => {
-    const win = window.open("", "Print QR Code");
-    win.document.write("<html><body>");
-    win.document.write(`<img src="${imageUrl}" />`);
-    win.document.write("</body></html>");
-    win.document.close();
-    win.focus();
-    win.print();
-    win.close();
-  };
-
-  // Download the QR code as an image
-  const downloadQRCode = (imageUrl, strCode) => {
-    const link = document.createElement("a");
-    link.href = imageUrl;
-    link.download = `${strCode}_qr_code.png`;
-    link.click();
-  };
   return (
     <div className="container mt-5">
-      <h1 className="mb-4">QR Code List</h1>
-
-      {/* Modal to display the QR Code and options */}
-      <Modal
-        isOpen={isModalOpen}
-        onRequestClose={() => setIsModalOpen(false)}
-        contentLabel="QR Code Modal"
-        ariaHideApp={false}
-        style={{
-          content: {
-            width: "50%",
-            margin: "auto",
-            padding: "20px",
-            textAlign: "center",
-          },
-        }}
-      >
-        <h2>QR Code</h2>
-        <div style={{ position: "relative", display: "inline-block" }}>
-          {/* {qrCodeData && <img src={qrCodeData} alt="QR Code" />} */}
-          {qrCodeData && (
-            <Image
-              src={qrCodeData}
-              alt="QR Code"
-              width={200} // Specify a width
-              height={200} // Specify a height
-              layout="intrinsic" // Maintain aspect ratio
-            />
-          )}
-        </div>
-
-        <div style={{ marginTop: "20px" }}>
-          <button
-            onClick={() => printQRCode(qrCodeData)}
-            className="btn btn-success me-2"
-          >
-            Print
-          </button>
-          <button
-            onClick={() => downloadQRCode(qrCodeData, "sample123")}
-            className="btn btn-primary"
-          >
-            Download
-          </button>
-        </div>
-
-        <button
-          onClick={() => setIsModalOpen(false)}
-          style={{ position: "absolute", top: "10px", right: "10px" }}
-        >
-          &times; Close
-        </button>
-      </Modal>
+      <h1 className="mb-4">Users List</h1>
 
       {/* Example QR code generation */}
 
@@ -255,31 +156,21 @@ function Event({ authData }) {
         <div className="d-flex">
           <input
             type="text"
-            placeholder="Search by Code"
+            placeholder="Search by Email"
             className="form-control me-2"
             value={searchCode}
-            onChange={(e) => setSearchCode(e.target.value)}
-            style={{ flex: 1 }}
-          />
-          <DatePicker
-            className="form-control"
-            selected={searchDate}
-            onChange={(date) => setSearchDate(date)}
-            dateFormat="dd/MM/yyyy"
-            placeholderText="DD/MM/YYYY"
-            isClearable
-            required
+            onChange={(e) => setSearchCode(e.target.value)} // Update searchCode state
             style={{ flex: 1 }}
           />
         </div>
 
         <div className="d-flex ">
-          <button onClick={handleExcle} className="btn btn-primary me-2">
+          {/* <button onClick={handleExcle} className="btn btn-primary me-2">
             Export Excel
-          </button>
+          </button> */}
 
-          <Link href="/qr_code/add" className="btn btn-primary">
-            Generate QR
+          <Link href="/users/signup" className="btn btn-primary">
+            Create User
           </Link>
         </div>
       </div>
@@ -288,16 +179,21 @@ function Event({ authData }) {
         <thead className="table-dark">
           <tr>
             <th style={{ textAlign: "center", verticalAlign: "middle" }}>Sr</th>
-            <th style={{ textAlign: "center", verticalAlign: "middle" }}>ID</th>
-            <th style={{ textAlign: "center", verticalAlign: "middle" }}>
-              Created At
-            </th>
-            <th style={{ textAlign: "center", verticalAlign: "middle" }}>
-              QR Code
-            </th>
 
             <th style={{ textAlign: "center", verticalAlign: "middle" }}>
-              Print
+              Name
+            </th>
+            <th style={{ textAlign: "center", verticalAlign: "middle" }}>
+              Email
+            </th>
+            <th style={{ textAlign: "center", verticalAlign: "middle" }}>
+              Phone Number
+            </th>
+            <th style={{ textAlign: "center", verticalAlign: "middle" }}>
+              Role
+            </th>
+            <th style={{ textAlign: "center", verticalAlign: "middle" }}>
+              Image
             </th>
             <th style={{ textAlign: "center", verticalAlign: "middle" }}>
               Actions
@@ -318,21 +214,30 @@ function Event({ authData }) {
               return (
                 <tr key={event.intID}>
                   <td>{globalIndex}</td>
-                  <td>{event.intID}</td>
-                  <td>{format(new Date(event.dtCreated_at), "dd-MM-yyyy")}</td>
-                  <td>{`http://51.112.24.26:5004/qr_code_validator/${event.strCode}`}</td>
-                  <td style={{ textAlign: "center", verticalAlign: "middle" }}>
-                    <button
-                      className="btn btn-primary btn-sm me-2"
-                      onClick={() =>
-                        handleQrCodePrint(event.intID, event.strCode)
-                      }
-                      disabled={loading === event.intID}
-                    >
-                      <FaPrint className="me-1" />
-                      {loading === event.intID ? "Processing..." : "Print QR"}
-                    </button>
+                  <td>{event.strName}</td>
+                  <td>{event.strEmail}</td>
+                  <td>{event.strMobile}</td>
+                  <td>
+                    {event.intRole == "1"
+                      ? "Admin"
+                      : event.intRole == "2"
+                      ? "Management User"
+                      : "Unknown Role"}
                   </td>
+                  <td style={{ textAlign: "center", verticalAlign: "middle" }}>
+                    {/* {event.strPicture ? (
+                      <Image
+                        src={`http://51.112.24.26:5003/${event.strPicture}`}
+                        alt={event.strName || "User Image"}
+                        width={50}
+                        height={50}
+                        style={{ borderRadius: "50%" }}
+                      />
+                    ) : (
+                      "No Image" // Fallback text if no image is available
+                    )} */}
+                  </td>
+
                   <td style={{ textAlign: "center", verticalAlign: "middle" }}>
                     <FaTrashAlt
                       className="text-danger"
@@ -377,4 +282,4 @@ function Event({ authData }) {
     </div>
   );
 }
-export default withAuth(Event, ["1"]);
+export default withAuth(Users, ["1"]);

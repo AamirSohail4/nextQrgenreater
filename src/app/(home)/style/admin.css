@@ -87,9 +87,9 @@ td {
   background-color: #182124;
 }
 /* Make sure the navbar links are aligned to the right */
-.navbar-nav.ms-auto {
-  margin-left: auto;
-}
+/* .navbar-nav.ms-auto {
+  margin-left: 0 !important;
+} */
 button.btn.btn-secondary {
   background-color: #0d6efd;
 }
@@ -262,4 +262,48 @@ footer {
   position: relative;
   bottom: 0;
   width: 100%;
+}
+.signup-form {
+  max-width: 550px;
+  margin: auto;
+  padding: 20px;
+  border: 1px solid #ccc;
+  border-radius: 10px;
+  background-color: #f9f9f9;
+}
+
+.form-group {
+  margin-bottom: 15px;
+}
+
+.form-group label {
+  display: block;
+  margin-bottom: 5px;
+}
+
+.form-group input,
+.form-group select {
+  width: 100%;
+  padding: 8px;
+  margin-top: 5px;
+  box-sizing: border-box;
+}
+
+.submit-button {
+  background-color: #007bff;
+  color: #fff;
+  padding: 10px 15px;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+.error-message {
+  color: red;
+  margin-bottom: 10px;
+}
+
+.success-message {
+  color: green;
+  margin-bottom: 10px;
 }

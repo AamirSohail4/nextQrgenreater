@@ -8,6 +8,7 @@ import withAuth from "@/components/Hoc"; // Import the HOC
 function Dashboard() {
   const { qrCode, qrCodDisplay } = useAppContext();
   const router = useRouter();
+  console.log("That is a qr", qrCode?.intScaneCount);
 
   return (
     <main className="main_container">
@@ -25,7 +26,7 @@ function Dashboard() {
         </div>
         <div className="card">
           <h4 className="card_title">QR Codes Scanned</h4>
-          <p className="card_description">Total QR Codes scanned. 0</p>
+          <p className="card_description">Total QR Codes scanned.0</p>
         </div>
       </div>
     </main>

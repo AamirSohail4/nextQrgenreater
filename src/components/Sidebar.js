@@ -3,15 +3,31 @@ import Link from "next/link";
 import { useState } from "react";
 import { usePathname } from "next/navigation"; // Use usePathname for App Router
 import Image from "next/image"; // Import Image from next/image
-import { FaTachometerAlt, FaQrcode, FaChevronDown } from "react-icons/fa"; // Import icons from react-icons
+import {
+  FaTachometerAlt,
+  FaQrcode,
+  FaChevronDown,
+  FaFileAlt,
+  FaUser,
+} from "react-icons/fa"; // Import icons from react-icons
 
 export function Sidebar() {
-  const pathname = usePathname(); // Get the current pathname
+  const pathname = usePathname(); // Get the current pathnames
+  const [isQROpen, setIsQROpen] = useState(false);
   const [isReportsOpen, setIsReportsOpen] = useState(false);
+  const [isUserOpen, setIsUserOpen] = useState(false);
 
   // Function to toggle dropdown visibility for QR Code Management
   const toggleReports = () => {
     setIsReportsOpen(!isReportsOpen);
+  };
+
+  const toggleQR = () => {
+    setIsQROpen(!isQROpen);
+  };
+
+  const toggleUser = () => {
+    setIsUserOpen(!isUserOpen);
   };
 
   const isActive = (path) => {
@@ -51,22 +67,22 @@ export function Sidebar() {
           {/* QR Code Management Dropdown */}
           <li className="nav-item">
             <button
-              onClick={toggleReports} // Toggle dropdown on click
+              onClick={toggleQR} // Toggle dropdown on click
               className="nav-link d-flex align-items-center"
             >
               <FaQrcode
                 className="sidebar-icon"
                 style={{ marginRight: "10px" }}
               />
-              QR Code Management
+
+              <span style={{ marginRight: "20px" }}> QR Code Management</span>
               <FaChevronDown
-                className={`ms-auto ${isReportsOpen ? "rotate-180" : ""}`}
-                style={{ marginLeft: "35px !important" }}
+                className={`ms-auto ${isQROpen ? "rotate-180" : ""}`}
               />
             </button>
 
             {/* Dropdown menu for QR Code Management */}
-            {isReportsOpen && (
+            {isQROpen && (
               <ul className="nav flex-column ms-3">
                 <li className="nav-item">
                   <Link
@@ -79,6 +95,83 @@ export function Sidebar() {
                   </Link>
                 </li>
                 {/* Add other links for QR Code Management if needed */}
+              </ul>
+            )}
+          </li>
+
+          {/* Reports Dropdown */}
+          <li className="nav-item">
+            <button
+              onClick={toggleReports} // Toggle dropdown on click
+              className="nav-link d-flex align-items-center"
+            >
+              <FaFileAlt
+                className="sidebar-icon"
+                style={{ marginRight: "10px" }}
+              />
+
+              <span style={{ marginRight: "20px" }}>Reports</span>
+              <FaChevronDown
+                className={`${isReportsOpen ? "rotate-180" : ""}`}
+              />
+            </button>
+
+            {/* Dropdown menu for Reports */}
+            {isReportsOpen && (
+              <ul className="nav flex-column ms-3">
+                <li className="nav-item">
+                  <Link
+                    href="/reports/summary"
+                    className={`nav-link ${
+                      isActive("/reports/summary") ? "active" : ""
+                    }`}
+                  >
+                    Summary
+                  </Link>
+                </li>
+                <li className="nav-item">
+                  <Link
+                    href="/reports/view_scan_logs"
+                    className={`nav-link ${
+                      isActive("/reports/view_scan_logs") ? "active" : ""
+                    }`}
+                  >
+                    View scan logs
+                  </Link>
+                </li>
+                {/* Add other links for Reports if needed */}
+              </ul>
+            )}
+          </li>
+
+          {/* User Dropdown */}
+          <li className="nav-item">
+            <button
+              onClick={toggleUser} // Toggle dropdown on click
+              className="nav-link d-flex align-items-center"
+            >
+              <FaUser
+                className="sidebar-icon"
+                style={{ marginRight: "10px" }}
+              />
+              <span style={{ marginRight: "20px" }}>User</span>
+              {/* Apply marginLeft here */}
+              <FaChevronDown
+                className={`ms-auto ${isUserOpen ? "rotate-180" : ""}`}
+              />
+            </button>
+
+            {/* Dropdown menu for User */}
+            {isUserOpen && (
+              <ul className="nav flex-column ms-3">
+                <li className="nav-item">
+                  <Link
+                    href="/users"
+                    className={`nav-link ${isActive("/users") ? "active" : ""}`}
+                  >
+                    Users
+                  </Link>
+                </li>
               </ul>
             )}
           </li>
