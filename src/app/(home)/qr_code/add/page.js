@@ -7,6 +7,7 @@ import * as XLSX from "xlsx";
 import withAuth from "@/components/Hoc";
 import jsPDF from "jspdf";
 import "jspdf-autotable";
+import { FaExcel, FaPdf } from "react-icons/fa";
 
 function AddQRCode() {
   const [count, setCount] = useState("");
