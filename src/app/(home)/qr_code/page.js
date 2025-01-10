@@ -118,17 +118,39 @@ function Event({ authData }) {
       }
     }
   };
-
-  // Function to handle exporting to Excel
   const handleExcle = () => {
+    // Function to format date and time to DD/MM/YYYY-HH:MM-am/pm
+    const formatDateTime = (date) => {
+      const now = new Date(date);
+
+      const day = String(now.getDate()).padStart(2, "0"); // Add leading zero if day < 10
+      const month = String(now.getMonth() + 1).padStart(2, "0"); // Add leading zero if month < 10
+      const year = now.getFullYear();
+
+      const hours = now.getHours();
+      const minutes = String(now.getMinutes()).padStart(2, "0"); // Add leading zero if minutes < 10
+
+      // Determine AM/PM
+      const ampm = hours >= 12 ? "pm" : "am";
+      const formattedHours = hours % 12 || 12; // Convert 24-hour time to 12-hour format
+
+      // Format date and time
+      return `${day}/${month}/${year}-${formattedHours}:${minutes}-${ampm}`;
+    };
+
     // Transform the data to match the desired headings and format
     const formattedData = filteredEvents.map((event, index) => ({
       Sr: index + 1, // Add a serial number
       ID: event.intID,
       "QR Code": `http://51.112.24.26:5004/qr_code_validator/${event.strCode}`,
-      "Last Scanned At": event.dtLastScanned_at || "",
+      "Last Scanned At": event.dtLastScanned_at
+        ? formatDateTime(event.dtLastScanned_at)
+        : "",
       "Scan Count": event.intScaneCount,
-      "Created At": new Date(event.dtCreated_at).toLocaleString(),
+      "Created At": event.dtCreated_at
+        ? formatDateTime(event.dtCreated_at)
+        : "",
+      StrRemarks: event.strRemarks,
     }));
 
     // Create the worksheet with the formatted data
@@ -136,8 +158,29 @@ function Event({ authData }) {
     const wb = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(wb, ws, "QR Codes");
 
+    // Generate the current date and time for the filename
+    const now = new Date();
+
+    const day = String(now.getDate()).padStart(2, "0"); // Add leading zero if day < 10
+    const month = String(now.getMonth() + 1).padStart(2, "0"); // Add leading zero if month < 10
+    const year = now.getFullYear();
+
+    const hours = now.getHours();
+    const minutes = String(now.getMinutes()).padStart(2, "0"); // Add leading zero if minutes < 10
+
+    // Determine AM/PM
+    const ampm = hours >= 12 ? "pm" : "am";
+    const formattedHours = hours % 12 || 12; // Convert 24-hour time to 12-hour format
+
+    // Format date and time for filename
+    const formattedDate = `${day}/${month}/${year}`;
+    const formattedTime = `${formattedHours}.${minutes}-${ampm}`;
+
+    // Combine date and time into the filename
+    const filename = `QRCode_Export-${formattedDate}-${formattedTime}.xlsx`;
+
     // Write the workbook to a file
-    XLSX.writeFile(wb, "QRCode_Export.xlsx");
+    XLSX.writeFile(wb, filename);
   };
 
   useEffect(() => {
@@ -295,7 +338,9 @@ function Event({ authData }) {
             <th style={{ textAlign: "center", verticalAlign: "middle" }}>
               QR Code
             </th>
-
+            <th style={{ textAlign: "center", verticalAlign: "middle" }}>
+              Remarks
+            </th>
             <th style={{ textAlign: "center", verticalAlign: "middle" }}>
               Print
             </th>
@@ -321,6 +366,7 @@ function Event({ authData }) {
                   <td>{event.intID}</td>
                   <td>{format(new Date(event.dtCreated_at), "dd-MM-yyyy")}</td>
                   <td>{`http://51.112.24.26:5004/qr_code_validator/${event.strCode}`}</td>
+                  <td>{event.strRemarks}</td>
                   <td style={{ textAlign: "center", verticalAlign: "middle" }}>
                     <button
                       className="btn btn-primary btn-sm me-2"

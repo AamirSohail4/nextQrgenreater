@@ -11,6 +11,7 @@ function AddQRCode() {
   const [qrCodes, setQrCodes] = useState([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const { qrCodDisplay } = useAppContext();
+  const [remarks, setRemarks] = useState();
   const router = useRouter();
 
   const generateUniqueCodes = (length) => {
@@ -34,12 +35,12 @@ function AddQRCode() {
 
     const generatedCodes = generateUniqueCodes(number);
 
-    const requestBody = { strCode: generatedCodes };
-
+    const requestBody = { strCode: generatedCodes, remarks: remarks };
+    console.log("That is a requestBody", requestBody);
     try {
       setIsSubmitting(true);
       const response = await fetch(
-        "http://51.112.24.26:5003/api/codes/add_qrCode",
+        "http://51.112.24.26:5004/api/codes/add_qrCode",
         {
           method: "POST",
           headers: {
@@ -75,29 +76,160 @@ function AddQRCode() {
   const handleCancel = () => {
     router.push("/qr_code");
   };
-
   const exportToExcel = () => {
-    const worksheet = XLSX.utils.json_to_sheet(
-      qrCodes.map((code, index) => ({
-        "Sr#": index + 1,
-        ID: code.intID,
-        "QR Code": `http://51.112.24.26:5004/qr_code_validator/${code.strCode}`,
-        "Last Scanned At": code.dtLast_scanned_at || "",
-        "Scan Count": code.intScan_count,
-        "Created At": new Date(code.dtCreated_at).toLocaleDateString("en-GB"),
-      }))
-    );
-    const workbook = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(workbook, worksheet, "QR Code");
-    XLSX.writeFile(workbook, "QRCode_Export.xlsx");
+    // Function to format date and time to DD/MM/YYYY-HH:MM-am/pm
+    const formatDateTime = (date) => {
+      const now = new Date(date);
+
+      const day = String(now.getDate()).padStart(2, "0"); // Add leading zero if day < 10
+      const month = String(now.getMonth() + 1).padStart(2, "0"); // Add leading zero if month < 10
+      const year = now.getFullYear();
+
+      const hours = now.getHours();
+      const minutes = String(now.getMinutes()).padStart(2, "0"); // Add leading zero if minutes < 10
+
+      // Determine AM/PM
+      const ampm = hours >= 12 ? "pm" : "am";
+      const formattedHours = hours % 12 || 12; // Convert 24-hour time to 12-hour format
+
+      // Format date and time
+      return `${day}/${month}/${year} ${formattedHours}:${minutes} ${ampm}`;
+    };
+
+    // Transform the data to match the desired headings and format
+    const formattedData = qrCodes.map((event, index) => ({
+      Sr: index + 1, // Add a serial number
+      ID: event.intID,
+      "QR Code": `http://51.112.24.26:5004/qr_code_validator/${event.strCode}`,
+      "Last Scanned At": event.dtLastScanned_at
+        ? formatDateTime(event.dtLastScanned_at)
+        : "",
+      "Scan Count": event.intScaneCount,
+      Remarks: event.strRemarks,
+      "Created At": event.dtCreated_at
+        ? formatDateTime(event.dtCreated_at)
+        : "",
+    }));
+
+    // Create the worksheet with the formatted data
+    const ws = XLSX.utils.json_to_sheet(formattedData);
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, "QR Codes");
+
+    // Generate the current date and time for the filename
+    const now = new Date();
+
+    const day = String(now.getDate()).padStart(2, "0"); // Add leading zero if day < 10
+    const month = String(now.getMonth() + 1).padStart(2, "0"); // Add leading zero if month < 10
+    const year = now.getFullYear();
+
+    const hours = now.getHours();
+    const minutes = String(now.getMinutes()).padStart(2, "0"); // Add leading zero if minutes < 10
+
+    // Determine AM/PM
+    const ampm = hours >= 12 ? "pm" : "am";
+    const formattedHours = hours % 12 || 12; // Convert 24-hour time to 12-hour format
+
+    // Replace invalid characters for filenames with alternatives
+    const formattedDate = `${day}_${month}_${year}`;
+    const formattedTime = `${formattedHours}.${minutes}${ampm}`; // Use period instead of colon
+
+    // Combine date and time into the filename
+    const filename = `QRCode_Export-${formattedDate}-${formattedTime}.xlsx`;
+
+    // Write the workbook to a file
+    XLSX.writeFile(wb, filename);
   };
+
+  // const exportToExcel = () => {
+  //   // Function to format date and time to DD/MM/YYYY-HH:MM-am/pm
+  //   const formatDateTime = (date) => {
+  //     const now = new Date(date);
+
+  //     const day = String(now.getDate()).padStart(2, "0"); // Add leading zero if day < 10
+  //     const month = String(now.getMonth() + 1).padStart(2, "0"); // Add leading zero if month < 10
+  //     const year = now.getFullYear();
+
+  //     const hours = now.getHours();
+  //     const minutes = String(now.getMinutes()).padStart(2, "0"); // Add leading zero if minutes < 10
+
+  //     // Determine AM/PM
+  //     const ampm = hours >= 12 ? "pm" : "am";
+  //     const formattedHours = hours % 12 || 12; // Convert 24-hour time to 12-hour format
+
+  //     // Format date and time
+  //     return `${day}/${month}/${year}-${formattedHours}:${minutes}-${ampm}`;
+  //   };
+
+  //   // Transform the data to match the desired headings and format
+  //   const formattedData = qrCodes.map((event, index) => ({
+  //     Sr: index + 1, // Add a serial number
+  //     ID: event.intID,
+  //     "QR Code": `http://51.112.24.26:5004/qr_code_validator/${event.strCode}`,
+  //     "Last Scanned At": event.dtLastScanned_at
+  //       ? formatDateTime(event.dtLastScanned_at)
+  //       : "",
+  //     "Scan Count": event.intScaneCount,
+  //     Remarks: event.strRemarks,
+  //     "Created At": event.dtCreated_at
+  //       ? formatDateTime(event.dtCreated_at)
+  //       : "",
+  //   }));
+
+  //   // Create the worksheet with the formatted data
+  //   const ws = XLSX.utils.json_to_sheet(formattedData);
+  //   const wb = XLSX.utils.book_new();
+  //   XLSX.utils.book_append_sheet(wb, ws, "QR Codes");
+
+  //   // Generate the current date and time for the filename
+  //   const now = new Date();
+
+  //   const day = String(now.getDate()).padStart(2, "0"); // Add leading zero if day < 10
+  //   const month = String(now.getMonth() + 1).padStart(2, "0"); // Add leading zero if month < 10
+  //   const year = now.getFullYear();
+
+  //   const hours = now.getHours();
+  //   const minutes = String(now.getMinutes()).padStart(2, "0"); // Add leading zero if minutes < 10
+
+  //   // Determine AM/PM
+  //   const ampm = hours >= 12 ? "pm" : "am";
+  //   const formattedHours = hours % 12 || 12; // Convert 24-hour time to 12-hour format
+
+  //   // Format date and time for filename
+  //   const formattedDate = `${day}/${month}/${year}`;
+  //   const formattedTime = `${formattedHours}/${minutes}${ampm}`
+  //     .replace(/:/g, "_")
+  //     .replace(/\//g, "_");
+
+  //   // Combine date and time into the filename
+  //   const filename = `QRCode_Export-${formattedDate}/${formattedTime}.xlsx`;
+
+  //   // Write the workbook to a file
+  //   XLSX.writeFile(wb, filename);
+  // };
+
+  // const exportToExcel = () => {
+  //   const worksheet = XLSX.utils.json_to_sheet(
+  //     qrCodes.map((code, index) => ({
+  //       "Sr#": index + 1,
+  //       ID: code.intID,
+  //       "QR Code": `http://51.112.24.26:5004/qr_code_validator/${code.strCode}`,
+  //       "Last Scanned At": code.dtLast_scanned_at || "",
+  //       "Scan Count": code.intScan_count,
+  //       "Created At": new Date(code.dtCreated_at).toLocaleDateString("en-GB"),
+  //     }))
+  //   );
+  //   const workbook = XLSX.utils.book_new();
+  //   XLSX.utils.book_append_sheet(workbook, worksheet, "QR Code");
+  //   XLSX.writeFile(workbook, "QRCode_Export.xlsx");
+  // };
 
   return (
     <div className="d-flex justify-content-center align-items-center mt-5">
       <div
         className="p-4 border rounded"
         style={{
-          maxWidth: "780px",
+          maxWidth: "940px",
           width: "100%",
           background: "white",
         }}
@@ -116,6 +248,23 @@ function AddQRCode() {
               placeholder="Enter number (e.g., 10)"
               value={count}
               onChange={(e) => setCount(e.target.value)}
+              required
+              min="1"
+              max="500"
+            />
+          </div>
+          <div className="mb-3">
+            <label htmlFor="count" className="form-label">
+              Remarks <span style={{ color: "red" }}>*</span>
+            </label>
+            <textarea
+              type="text"
+              id="text"
+              name="text"
+              className="form-control form-control-sm"
+              placeholder="Enter your remarks"
+              value={remarks}
+              onChange={(e) => setRemarks(e.target.value)}
               required
               min="1"
               max="500"
@@ -169,6 +318,7 @@ function AddQRCode() {
                   <th>Created At</th>
                   <th>Last Scanned At</th>
                   <th>Scan Count</th>
+                  <th>Remarks</th>
                 </tr>
               </thead>
               <tbody>
@@ -188,6 +338,7 @@ function AddQRCode() {
                         : "Not Scanned"}
                     </td>
                     <td>{code.intScan_count}</td>
+                    <td>{code.strRemarks}</td>
                   </tr>
                 ))}
               </tbody>
