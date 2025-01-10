@@ -5,6 +5,8 @@ import { useRouter } from "next/navigation";
 import { useAppContext } from "@/context/AppContext";
 import * as XLSX from "xlsx";
 import withAuth from "@/components/Hoc";
+import jsPDF from "jspdf";
+import "jspdf-autotable";
 
 function AddQRCode() {
   const [count, setCount] = useState("");
@@ -100,7 +102,7 @@ function AddQRCode() {
     const formattedData = qrCodes.map((event, index) => ({
       Sr: index + 1, // Add a serial number
       ID: event.intID,
-      "QR Code": `http://51.112.24.26:5003/qr_code_validator/${event.strCode}`,
+      "QR Code": `http://51.112.24.26:5004/qr_code_validator/${event.strCode}`,
       "Last Scanned At": event.dtLastScanned_at
         ? formatDateTime(event.dtLastScanned_at)
         : "",
@@ -139,6 +141,51 @@ function AddQRCode() {
 
     // Write the workbook to a file
     XLSX.writeFile(wb, filename);
+  };
+
+  // Your existing component and other imports...
+
+  const exportToPdf = () => {
+    // Create a new instance of jsPDF
+    const doc = new jsPDF();
+
+    // Add a title
+    doc.setFontSize(16);
+    doc.text("Generated QR Codes", 14, 10);
+
+    // Format table data for jsPDF-Autotable
+    const tableColumn = [
+      "Sr",
+      "ID",
+      "QR Code",
+      "Created At",
+      "Last Scanned At",
+      "Scan Count",
+      "Remarks",
+    ];
+    const tableRows = qrCodes.map((code, index) => [
+      index + 1, // Sr
+      code.intID, // ID
+      `http://51.112.24.26:5004/qr_code_validator/${code.strCode}`, // QR Code
+      new Date(code.dtCreated_at).toLocaleDateString("en-GB"), // Created At
+      code.dtLast_scanned_at
+        ? new Date(code.dtLast_scanned_at).toLocaleDateString("en-GB")
+        : "Not Scanned", // Last Scanned At
+      code.intScan_count, // Scan Count
+      code.strRemarks, // Remarks
+    ]);
+
+    // Add the table to the PDF
+    doc.autoTable({
+      head: [tableColumn],
+      body: tableRows,
+      startY: 20,
+      styles: { fontSize: 10 },
+      headStyles: { fillColor: [22, 160, 133] }, // Customize header style
+    });
+
+    // Save the PDF
+    doc.save("QRCode_Data.pdf");
   };
 
   return (
@@ -225,6 +272,13 @@ function AddQRCode() {
               >
                 Export to Excel
               </button>
+              <button
+                type="button"
+                className="btn btn-success btn-sm"
+                onClick={exportToPdf}
+              >
+                Export to PDF
+              </button>
             </div>
             <table className="table table-bordered text-center">
               <thead>
@@ -243,7 +297,7 @@ function AddQRCode() {
                   <tr key={code.intID}>
                     <td>{index + 1}</td>
                     <td>{code.intID}</td>
-                    <td>{`http://51.112.24.26:5003/qr_code_validator/${code.strCode}`}</td>
+                    <td>{`http://51.112.24.26:5004/qr_code_validator/${code.strCode}`}</td>
                     <td>
                       {new Date(code.dtCreated_at).toLocaleDateString("en-GB")}
                     </td>
