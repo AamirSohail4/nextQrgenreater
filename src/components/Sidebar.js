@@ -10,8 +10,10 @@ import {
   FaFileAlt,
   FaUser,
 } from "react-icons/fa"; // Import icons from react-icons
+import { useAuth } from "@/context/AuthContext";
 
 export function Sidebar() {
+  const { authData } = useAuth();
   const pathname = usePathname(); // Get the current pathnames
   const [isQROpen, setIsQROpen] = useState(false);
   const [isReportsOpen, setIsReportsOpen] = useState(false);
@@ -145,36 +147,55 @@ export function Sidebar() {
           </li>
 
           {/* User Dropdown */}
-          <li className="nav-item">
-            <button
-              onClick={toggleUser} // Toggle dropdown on click
-              className="nav-link d-flex align-items-center"
-            >
-              <FaUser
-                className="sidebar-icon"
-                style={{ marginRight: "10px" }}
-              />
-              <span style={{ marginRight: "20px" }}>User</span>
-              {/* Apply marginLeft here */}
-              <FaChevronDown
-                className={`ms-auto ${isUserOpen ? "rotate-180" : ""}`}
-              />
-            </button>
+          {authData?.role !== "Management" && (
+            <li className="nav-item">
+              <button
+                onClick={toggleUser} // Toggle dropdown on click
+                className="nav-link d-flex align-items-center"
+              >
+                <FaUser
+                  className="sidebar-icon"
+                  style={{ marginRight: "10px" }}
+                />
+                <span style={{ marginRight: "20px" }}>User</span>
+                {/* Apply marginLeft here */}
+                <FaChevronDown
+                  className={`ms-auto ${isUserOpen ? "rotate-180" : ""}`}
+                />
+              </button>
 
-            {/* Dropdown menu for User */}
-            {isUserOpen && (
-              <ul className="nav flex-column ms-3">
-                <li className="nav-item">
-                  <Link
-                    href="/users"
-                    className={`nav-link ${isActive("/users") ? "active" : ""}`}
-                  >
-                    Users
-                  </Link>
-                </li>
-              </ul>
-            )}
-          </li>
+              {/* Dropdown menu for User */}
+              {isUserOpen && (
+                <ul className="nav flex-column ms-3">
+                  <li className="nav-item">
+                    <Link
+                      href="/users"
+                      className={`nav-link ${
+                        isActive("/users") ? "active" : ""
+                      }`}
+                    >
+                      Users
+                    </Link>
+                  </li>
+                </ul>
+              )}
+              {/* Dropdown menu for User_group */}
+              {isUserOpen && (
+                <ul className="nav flex-column ms-3">
+                  <li className="nav-item">
+                    <Link
+                      href="/user_group"
+                      className={`nav-link ${
+                        isActive("/users") ? "active" : ""
+                      }`}
+                    >
+                      User_group
+                    </Link>
+                  </li>
+                </ul>
+              )}
+            </li>
+          )}
         </ul>
       </nav>
     </div>

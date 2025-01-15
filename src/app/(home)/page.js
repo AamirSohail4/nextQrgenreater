@@ -34,4 +34,4 @@ function Dashboard() {
 }
 
 // Wrap the component with the HOC, allowing only users with role "1" to access
-export default withAuth(Dashboard, ["1"]);
+export default withAuth(Dashboard, ["Admin", "Management"]);

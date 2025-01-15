@@ -3,11 +3,10 @@
 import { createContext, useState, useEffect, useContext } from "react";
 import { jwtDecode } from "jwt-decode";
 
-console.log("That is jwt_decode", jwtDecode);
 const AuthContext = createContext();
 
 export const useAuth = () => {
-  return useContext(AuthContext); // Custom hook to access the auth context
+  return useContext(AuthContext);
 };
 
 export const AuthProvider = ({ children }) => {
@@ -24,13 +23,12 @@ export const AuthProvider = ({ children }) => {
       const decodedToken = jwtDecode(token); // Decode the token
       setAuthData({
         userId: decodedToken.userId,
-        role: decodedToken.role,
+        role: decodedToken?.role,
         token: token,
       });
     }
   }, []);
 
-  console.log("That is a authContect", authData);
   // Function to log out the user
   const logout = () => {
     setAuthData({ userId: null, role: null, token: null });

@@ -20,6 +20,7 @@ import Modal from "react-modal";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import withAuth from "@/components/Hoc";
+import { useAuth } from "@/context/AuthContext";
 // React Modal custom styles
 const customStyles = {
   content: {
@@ -37,8 +38,10 @@ const customStyles = {
   },
 };
 
-function Event({ authData }) {
+function Event() {
   const { qrCode, qrCodDisplay } = useAppContext();
+  const { authData } = useAuth();
+  console.log("That ia a aamir authData", authData?.role == "Management");
   const { Canvas } = useQRCode();
   const [loading, setLoading] = useState(null);
   const qrCodeRef = useRef(null);
@@ -320,10 +323,13 @@ function Event({ authData }) {
           <button onClick={handleExcle} className="btn btn-primary me-2">
             Export Excel
           </button>
-
-          <Link href="/qr_code/add" className="btn btn-primary">
-            Generate QR
-          </Link>
+          <div>
+            {authData?.role !== "Management" && (
+              <Link href="/qr_code/add" className="btn btn-primary">
+                Generate QR
+              </Link>
+            )}
+          </div>
         </div>
       </div>
 
@@ -423,4 +429,4 @@ function Event({ authData }) {
     </div>
   );
 }
-export default withAuth(Event, ["1"]);
+export default withAuth(Event, ["Admin", "Management"]);

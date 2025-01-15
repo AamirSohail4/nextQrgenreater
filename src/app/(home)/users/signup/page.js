@@ -11,7 +11,7 @@ const SignupForm = () => {
     email: "",
     password: "",
     mobile_number: "",
-    role: "",
+    user_group_id: "",
     picture: null, // Store file object
     remarks: "", // Added remarks field
   });
@@ -20,8 +20,8 @@ const SignupForm = () => {
 
   const [error, setError] = useState(null);
   const [successMessage, setSuccessMessage] = useState(null);
-  const [validationErrors, setValidationErrors] = useState({}); // Store validation errors
-  const { participant, disPlayUsers } = useAppContext();
+  const [validationErrors, setValidationErrors] = useState({});
+  const { disPlayUsers, userGroup } = useAppContext();
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     setFormData({ ...formData, [name]: value });
@@ -84,15 +84,15 @@ const SignupForm = () => {
     form.append("name", formData.name);
     form.append("email", formData.email);
     form.append("password", formData.password);
-    form.append("mobile_number", formData.mobile_number);
-    form.append("role", formData.role);
+    form.append("mobile", formData.mobile_number);
+    form.append("user_group_id", formData.user_group_id);
     if (formData.picture) {
       form.append("picture", formData.picture);
     }
 
     try {
       const response = await axios.post(
-        "http://localhost:8080/api/users/add",
+        "http://51.112.24.26:5003/api/users/createNew",
         form,
         { headers: { "Content-Type": "multipart/form-data" } }
       );
@@ -125,22 +125,27 @@ const SignupForm = () => {
 
         <form onSubmit={handleSubmit}>
           <div className="form-group">
-            <label htmlFor="role">
+            <label htmlFor="user_group_id">
               Role<span style={{ color: "red" }}>*</span>
             </label>
             <select
-              id="role"
-              name="role"
-              value={formData.role}
+              id="user_group_id"
+              name="user_group_id"
+              value={formData.user_group_id}
               onChange={handleInputChange}
               required
             >
-              <option value="">Select a role</option>
-              <option value="1">Admin</option>
-              <option value="2">Management User</option>
+              <option value="">Select a Role</option>
+              {userGroup?.map((group) => (
+                <option key={group.intID} value={group.intID}>
+                  {group.strGroupName}
+                </option>
+              ))}
             </select>
-            {validationErrors.role && (
-              <div className="error-message">{validationErrors.role}</div>
+            {validationErrors.user_group_id && (
+              <div className="error-message">
+                {validationErrors.user_group_id}
+              </div>
             )}
           </div>
 
@@ -258,4 +263,4 @@ const SignupForm = () => {
   );
 };
 
-export default withAuth(SignupForm, ["1"]);
+export default withAuth(SignupForm, ["Admin"]);

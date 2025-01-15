@@ -15,6 +15,7 @@ export const AppProvider = ({ children }) => {
   const [eventParticipant, setEventParticipant] = useState([]);
   const [eventSumary, setEventSumary] = useState([]);
   const [participant, setParticipant] = useState([]);
+  const [userGroup, setUserGroup] = useState([]);
 
   //QR Generater Display
   const qrCodDisplay = async () => {
@@ -95,13 +96,27 @@ export const AppProvider = ({ children }) => {
     }
   };
 
+  //QR Generater Display
+  const userGroupDisplay = async () => {
+    try {
+      const response = await fetch(
+        "http://51.112.24.26:5003/api/users/user_group"
+      );
+      const user_group = await response.json();
+      setUserGroup(user_group?.data);
+    } catch (error) {
+      console.log("Error fetching events", error);
+    }
+  };
+
   useEffect(() => {
-    getTokenAndSetUserId();
+    // getTokenAndSetUserId();
     qrCodDisplay();
     eventDisplay(); // Fetch events
     disPlayUsers(); // Fetch participants
     eventParticipantDisplay();
     eventParticipantSummary();
+    userGroupDisplay();
   }, []);
 
   return (
@@ -120,6 +135,8 @@ export const AppProvider = ({ children }) => {
         eventParticipantDisplay,
         eventSumary,
         eventParticipantSummary,
+        userGroup,
+        userGroupDisplay,
       }}
     >
       {children}

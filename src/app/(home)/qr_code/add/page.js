@@ -1,11 +1,12 @@
 "use client";
 import { useState } from "react";
-import QRCode from "qrcode.react";
+// import QRCode from "qrcode.react";
 import { useRouter } from "next/navigation";
 import { useAppContext } from "@/context/AppContext";
 import * as XLSX from "xlsx";
 import withAuth from "@/components/Hoc";
-import jsPDF from "jspdf";
+import QRCode from "qrcode";
+import { jsPDF } from "jspdf";
 import "jspdf-autotable";
 import { FaExcel, FaPdf } from "react-icons/fa";
 
@@ -146,47 +147,49 @@ function AddQRCode() {
 
   // Your existing component and other imports...
 
-  const exportToPdf = () => {
-    // Create a new instance of jsPDF
-    const doc = new jsPDF();
+  const exportToPDF = async () => {
+    const pdf = new jsPDF();
+    const qrCodeSize = 50; // Size of the QR code in mm
+    const marginTop = 50; // Top margin for QR code on each page
+    const marginLeft = 75; // Center the QR code on the page
 
-    // Add a title
-    doc.setFontSize(16);
-    doc.text("Generated QR Codes", 14, 10);
+    for (let i = 0; i < qrCodes.length; i++) {
+      const event = qrCodes[i];
+      const qrCodeURL = `http://51.112.24.26:5004/qr_code_validator/${event.strCode}`;
 
-    // Format table data for jsPDF-Autotable
-    const tableColumn = [
-      "Sr",
-      "ID",
-      "QR Code",
-      "Created At",
-      "Last Scanned At",
-      "Scan Count",
-      "Remarks",
-    ];
-    const tableRows = qrCodes.map((code, index) => [
-      index + 1, // Sr
-      code.intID, // ID
-      `http://51.112.24.26:5004/qr_code_validator/${code.strCode}`, // QR Code
-      new Date(code.dtCreated_at).toLocaleDateString("en-GB"), // Created At
-      code.dtLast_scanned_at
-        ? new Date(code.dtLast_scanned_at).toLocaleDateString("en-GB")
-        : "Not Scanned", // Last Scanned At
-      code.intScan_count, // Scan Count
-      code.strRemarks, // Remarks
-    ]);
+      // Generate QR code as a data URL
+      try {
+        const qrCodeDataURL = await QRCode.toDataURL(qrCodeURL, {
+          errorCorrectionLevel: "M",
+          scale: 4, // Scale the QR code size
+        });
 
-    // Add the table to the PDF
-    doc.autoTable({
-      head: [tableColumn],
-      body: tableRows,
-      startY: 20,
-      styles: { fontSize: 10 },
-      headStyles: { fillColor: [22, 160, 133] }, // Customize header style
-    });
+        // Add the QR code to the PDF
+        pdf.addImage(
+          qrCodeDataURL, // QR code image
+          "PNG", // Image format
+          marginLeft, // X position
+          marginTop, // Y position
+          qrCodeSize, // Width
+          qrCodeSize // Height
+        );
 
-    // Save the PDF
-    doc.save("QRCode_Data.pdf");
+        // Add a new page for the next QR code, unless it's the last one
+        if (i < qrCodes.length - 1) {
+          pdf.addPage();
+        }
+      } catch (error) {
+        console.error(`Failed to generate QR code for ${qrCodeURL}:`, error);
+      }
+    }
+
+    // Save the PDF with a filename
+    const now = new Date();
+    const formattedDate = now.toISOString().split("T")[0]; // YYYY-MM-DD format
+    const formattedTime = now.toTimeString().split(" ")[0].replace(/:/g, "-"); // HH-MM-SS format
+    const filename = `QRCode_Export-${formattedDate}-${formattedTime}.pdf`;
+
+    pdf.save(filename);
   };
 
   return (
@@ -276,7 +279,7 @@ function AddQRCode() {
               <button
                 type="button"
                 className="btn btn-success btn-sm"
-                onClick={exportToPdf}
+                onClick={exportToPDF}
               >
                 Export to PDF
               </button>
@@ -322,4 +325,4 @@ function AddQRCode() {
   );
 }
 
-export default withAuth(AddQRCode, ["1"]);
+export default withAuth(AddQRCode, ["Admin"]);
