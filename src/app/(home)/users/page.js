@@ -2,7 +2,7 @@
 
 import ReactDOM from "react-dom";
 import Link from "next/link";
-import { FaTrashAlt, FaPrint, FaQrcode } from "react-icons/fa";
+import { FaTrashAlt, FaPrint, FaQrcode, FaEdit } from "react-icons/fa";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useAppContext } from "@/context/AppContext";
@@ -218,7 +218,7 @@ function Users({ authData }) {
                   <td>{event.strEmail}</td>
                   <td>{event.strMobile}</td>
                   <td>{event.strGroupName}</td>
-                  {/* <td style={{ textAlign: "center", verticalAlign: "middle" }}>
+                  <td style={{ textAlign: "center", verticalAlign: "middle" }}>
                     {event.strPicture ? (
                       <Image
                         src={`http://51.112.24.26:5003/${event.strPicture}`}
@@ -230,9 +230,17 @@ function Users({ authData }) {
                     ) : (
                       "No Image" // Fallback text if no image is available
                     )}
-                  </td> */}
+                  </td>
 
                   <td style={{ textAlign: "center", verticalAlign: "middle" }}>
+                    <Link
+                      href={`/users/edit?id=${event.intID}&page=${currentPage}`}
+                    >
+                      <FaEdit
+                        className="text-primary me-3"
+                        style={{ cursor: "pointer" }}
+                      />
+                    </Link>
                     <FaTrashAlt
                       className="text-danger"
                       style={{ cursor: "pointer" }}
