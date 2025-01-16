@@ -144,39 +144,49 @@ function AddQRCode() {
     // Write the workbook to a file
     XLSX.writeFile(wb, filename);
   };
-
-  // Your existing component and other imports...
-
+  //latest
   const exportToPDF = async () => {
-    const pdf = new jsPDF();
-    const qrCodeSize = 50; // Size of the QR code in mm
-    const marginTop = 50; // Top margin for QR code on each page
-    const marginLeft = 75; // Center the QR code on the page
+    // Define custom page size: 55.88 mm x 25.4 mm
+    const pageWidth = 55.88; // Width in mm
+    const pageHeight = 19.05; // Height in mm
+
+    const pdf = new jsPDF({
+      unit: "mm", // Units for dimensions
+      format: [pageWidth, pageHeight], // Custom page size [width, height]
+      orientation: "landscape", // Set orientation to landscape
+    });
+
+    // Adjust QR code size to fit within the page
+    const qrCodeWidth = 16; // QR code width in mm
+    const qrCodeHeight = 16; // QR code height in mm
+
+    // Center the QR code on the page
+    const marginLeft = (pageWidth - qrCodeWidth) / 2 + 4; // X position to center QR code
+    const marginTop = (pageHeight - qrCodeHeight) / 2 - 1; // Y position to center QR code
 
     for (let i = 0; i < qrCodes.length; i++) {
       const event = qrCodes[i];
       const qrCodeURL = `http://51.112.24.26:5004/qr_code_validator/${event.strCode}`;
 
-      // Generate QR code as a data URL
       try {
         const qrCodeDataURL = await QRCode.toDataURL(qrCodeURL, {
           errorCorrectionLevel: "M",
-          scale: 4, // Scale the QR code size
+          scale: 4, // Scale for high resolution
         });
 
-        // Add the QR code to the PDF
+        // Add the QR code to the custom-sized PDF
         pdf.addImage(
           qrCodeDataURL, // QR code image
           "PNG", // Image format
           marginLeft, // X position
           marginTop, // Y position
-          qrCodeSize, // Width
-          qrCodeSize // Height
+          qrCodeWidth, // Width
+          qrCodeHeight // Height
         );
 
         // Add a new page for the next QR code, unless it's the last one
         if (i < qrCodes.length - 1) {
-          pdf.addPage();
+          pdf.addPage([pageWidth, pageHeight]); // Create a new page with the same custom size
         }
       } catch (error) {
         console.error(`Failed to generate QR code for ${qrCodeURL}:`, error);
@@ -191,6 +201,199 @@ function AddQRCode() {
 
     pdf.save(filename);
   };
+
+  // Your existing component and other imports...
+  // const exportToPDF = async () => {
+  //   // Define custom page size: 3.2 inches x 0.75 inches
+  //   const pageWidth = 81.05; // 3.2 inches in mm
+  //   const pageHeight = 81.28; //19.05; // 0.75 inches in mm
+
+  //   const pdf = new jsPDF({
+  //     unit: "mm", // Units for dimensions
+  //     format: [pageWidth, pageHeight], // Custom page size [width, height]
+  //   });
+
+  //   const qrCodeWidth = 76.2; // QR code width (3.00 inches in mm)
+  //   const qrCodeHeight = 19.05; // QR code height (0.75 inches in mm)
+  //   const marginLeft = (pageWidth - qrCodeWidth) / 2; // Center QR code horizontally
+  //   const marginTop = 0; // Start at the top of the page
+
+  //   for (let i = 0; i < qrCodes.length; i++) {
+  //     const event = qrCodes[i];
+  //     const qrCodeURL = `http://51.112.24.26:5004/qr_code_validator/${event.strCode}`;
+
+  //     try {
+  //       const qrCodeDataURL = await QRCode.toDataURL(qrCodeURL, {
+  //         errorCorrectionLevel: "M",
+  //         scale: 4, // Scale for high resolution
+  //       });
+
+  //       // Add the QR code to the custom-sized PDF
+  //       pdf.addImage(
+  //         qrCodeDataURL, // QR code image
+  //         "PNG", // Image format
+  //         marginLeft, // X position
+  //         marginTop, // Y position
+  //         qrCodeWidth, // Width
+  //         qrCodeHeight // Height
+  //       );
+
+  //       // Add a new page for the next QR code, unless it's the last one
+  //       if (i < qrCodes.length - 1) {
+  //         pdf.addPage([pageWidth, pageHeight]); // Create a new page with the same custom size
+  //       }
+  //     } catch (error) {
+  //       console.error(`Failed to generate QR code for ${qrCodeURL}:`, error);
+  //     }
+  //   }
+
+  //   // Save the PDF with a filename
+  //   const now = new Date();
+  //   const formattedDate = now.toISOString().split("T")[0]; // YYYY-MM-DD format
+  //   const formattedTime = now.toTimeString().split(" ")[0].replace(/:/g, "-"); // HH-MM-SS format
+  //   const filename = `QRCode_Export-${formattedDate}-${formattedTime}.pdf`;
+
+  //   pdf.save(filename);
+  // };
+
+  //1
+  // const exportToPDF = async () => {
+  //   const pdf = new jsPDF();
+  //   const qrCodeSize = 50; // Size of the QR code in mm
+  //   const marginTop = 50; // Top margin for QR code on each page
+  //   const marginLeft = 120; // Center the QR code on the page
+
+  //   for (let i = 0; i < qrCodes.length; i++) {
+  //     const event = qrCodes[i];
+  //     const qrCodeURL = `http://51.112.24.26:5004/qr_code_validator/${event.strCode}`;
+
+  //     // Generate QR code as a data URL
+  //     try {
+  //       const qrCodeDataURL = await QRCode.toDataURL(qrCodeURL, {
+  //         errorCorrectionLevel: "M",
+  //         scale: 4, // Scale the QR code size
+  //       });
+
+  //       // Add the QR code to the PDF
+  //       pdf.addImage(
+  //         qrCodeDataURL, // QR code image
+  //         "PNG", // Image format
+  //         marginLeft, // X position
+  //         marginTop, // Y position
+  //         qrCodeSize, // Width
+  //         qrCodeSize // Height
+  //       );
+
+  //       // Add a new page for the next QR code, unless it's the last one
+  //       if (i < qrCodes.length - 1) {
+  //         pdf.addPage();
+  //       }
+  //     } catch (error) {
+  //       console.error(`Failed to generate QR code for ${qrCodeURL}:`, error);
+  //     }
+  //   }
+
+  //   // Save the PDF with a filename
+  //   const now = new Date();
+  //   const formattedDate = now.toISOString().split("T")[0]; // YYYY-MM-DD format
+  //   const formattedTime = now.toTimeString().split(" ")[0].replace(/:/g, "-"); // HH-MM-SS format
+  //   const filename = `QRCode_Export-${formattedDate}-${formattedTime}.pdf`;
+
+  //   pdf.save(filename);
+  // };
+  //2
+  // const exportToPDF = async () => {
+  //   const pdf = new jsPDF();
+  //   const qrCodeWidth = 76.2; // Width of the QR code in mm (3.00 inches)
+  //   const qrCodeHeight = 19.05; // Height of the QR code in mm (0.75 inches)
+  //   const marginTop = 50; // Top margin for QR code on each page
+  //   const marginLeft = 75; // Center the QR code on the page
+
+  //   for (let i = 0; i < qrCodes.length; i++) {
+  //     const event = qrCodes[i];
+  //     const qrCodeURL = `http://51.112.24.26:5004/qr_code_validator/${event.strCode}`;
+
+  //     // Generate QR code as a data URL
+  //     try {
+  //       const qrCodeDataURL = await QRCode.toDataURL(qrCodeURL, {
+  //         errorCorrectionLevel: "M",
+  //         scale: 2, // Scale the QR code size
+  //       });
+
+  //       // Add the QR code to the PDF
+  //       pdf.addImage(
+  //         qrCodeDataURL, // QR code image
+  //         "PNG", // Image format
+  //         marginLeft, // X position
+  //         marginTop, // Y position
+  //         qrCodeWidth, // Width
+  //         qrCodeHeight // Height
+  //       );
+
+  //       // Add a new page for the next QR code, unless it's the last one
+  //       if (i < qrCodes.length - 1) {
+  //         pdf.addPage();
+  //       }
+  //     } catch (error) {
+  //       console.error(`Failed to generate QR code for ${qrCodeURL}:`, error);
+  //     }
+  //   }
+
+  //   // Save the PDF with a filename
+  //   const now = new Date();
+  //   const formattedDate = now.toISOString().split("T")[0]; // YYYY-MM-DD format
+  //   const formattedTime = now.toTimeString().split(" ")[0].replace(/:/g, "-"); // HH-MM-SS format
+  //   const filename = `QRCode_Export-${formattedDate}-${formattedTime}.pdf`;
+
+  //   pdf.save(filename);
+  // };
+  //3
+  // const exportToPDF = async () => {
+  //   const pdf = new jsPDF();
+
+  //   const qrCodeWidth = 76.2; // 3.00 inches in mm
+  //   const qrCodeHeight = 19.05; // 0.75 inches in mm
+  //   const marginTop = 50; // Top margin for QR code on each page
+  //   const marginLeft = 120; // Center the QR code on the page
+
+  //   for (let i = 0; i < qrCodes.length; i++) {
+  //     const event = qrCodes[i];
+  //     const qrCodeURL = `http://51.112.24.26:5004/qr_code_validator/${event.strCode}`;
+
+  //     // Generate QR code as a data URL
+  //     try {
+  //       const qrCodeDataURL = await QRCode.toDataURL(qrCodeURL, {
+  //         errorCorrectionLevel: "M",
+  //         scale: 4, // Scale to enhance resolution for larger size
+  //       });
+
+  //       // Add the QR code to the PDF with the specified size
+  //       pdf.addImage(
+  //         qrCodeDataURL, // QR code image
+  //         "PNG", // Image format
+  //         marginLeft, // X position
+  //         marginTop, // Y position
+  //         qrCodeWidth, // Width (76.2 mm)
+  //         qrCodeHeight // Height (19.05 mm)
+  //       );
+
+  //       // Add a new page for the next QR code, unless it's the last one
+  //       if (i < qrCodes.length - 1) {
+  //         pdf.addPage();
+  //       }
+  //     } catch (error) {
+  //       console.error(`Failed to generate QR code for ${qrCodeURL}:`, error);
+  //     }
+  //   }
+
+  //   // Save the PDF with a filename
+  //   const now = new Date();
+  //   const formattedDate = now.toISOString().split("T")[0]; // YYYY-MM-DD format
+  //   const formattedTime = now.toTimeString().split(" ")[0].replace(/:/g, "-"); // HH-MM-SS format
+  //   const filename = `QRCode_Export-${formattedDate}-${formattedTime}.pdf`;
+
+  //   pdf.save(filename);
+  // };
 
   return (
     <div className="d-flex justify-content-center align-items-center mt-5">

@@ -218,7 +218,7 @@ function Users({ authData }) {
                   <td>{event.strEmail}</td>
                   <td>{event.strMobile}</td>
                   <td>{event.strGroupName}</td>
-                  <td style={{ textAlign: "center", verticalAlign: "middle" }}>
+                  {/* <td style={{ textAlign: "center", verticalAlign: "middle" }}>
                     {event.strPicture ? (
                       <Image
                         src={`http://51.112.24.26:5003/${event.strPicture}`}
@@ -230,7 +230,7 @@ function Users({ authData }) {
                     ) : (
                       "No Image" // Fallback text if no image is available
                     )}
-                  </td>
+                  </td> */}
 
                   <td style={{ textAlign: "center", verticalAlign: "middle" }}>
                     <FaTrashAlt
