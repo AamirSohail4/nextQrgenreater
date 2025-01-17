@@ -99,7 +99,7 @@ function Users({ authData }) {
     if (confirmDelete) {
       try {
         const response = await fetch(
-          `http://51.112.24.26:5003/api/users/users/${id}`,
+          `https://admin.gmcables.com/api/users/users/${id}`,
           {
             method: "DELETE",
           }
@@ -221,7 +221,7 @@ function Users({ authData }) {
                   <td style={{ textAlign: "center", verticalAlign: "middle" }}>
                     {event.strPicture ? (
                       <Image
-                        src={`http://51.112.24.26:5003/${event.strPicture}`}
+                        src={`https://admin.gmcables.com/${event.strPicture}`}
                         alt={event.strName || "User Image"}
                         width={50}
                         height={50}

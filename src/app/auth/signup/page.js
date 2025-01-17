@@ -26,7 +26,7 @@ export default function Register() {
     console.log("Form Data Submitted:", formData);
 
     try {
-      const response = await fetch("http://51.112.24.26:5003/api/users/add", {
+      const response = await fetch("https://admin.gmcables.com/api/users/add", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

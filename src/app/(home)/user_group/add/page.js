@@ -51,7 +51,7 @@ const SignupForm = () => {
       form.append("groupname", formData.name);
 
       const response = await axios.post(
-        "http://51.112.24.26:5003/api/users/add_user_group",
+        "https://admin.gmcables.com/api/users/add_user_group",
         form,
         { headers: { "Content-Type": "multipart/form-data" } }
       );
@@ -117,4 +117,4 @@ const SignupForm = () => {
   );
 };
 
-export default withAuth(SignupForm, ["1"]);
+export default withAuth(SignupForm, ["Admin"]);

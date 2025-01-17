@@ -21,7 +21,7 @@ export const AppProvider = ({ children }) => {
   const qrCodDisplay = async () => {
     try {
       const response = await fetch(
-        "http://51.112.24.26:5003/api/codes/qr_codes"
+        "https://admin.gmcables.com/api/codes/qr_codes"
       );
       const qrtItem = await response.json();
       setQRCode(qrtItem?.data);
@@ -33,7 +33,9 @@ export const AppProvider = ({ children }) => {
   // Fetch all Events
   const eventDisplay = async () => {
     try {
-      const response = await fetch("http://51.112.24.26:5003/api/event/getAll");
+      const response = await fetch(
+        "https://admin.gmcables.com/api/event/getAll"
+      );
       const eventItem = await response.json();
       setEvent(eventItem?.data);
     } catch (error) {
@@ -44,7 +46,9 @@ export const AppProvider = ({ children }) => {
   // Fetch all Participants
   const disPlayUsers = async () => {
     try {
-      const response = await fetch("http://51.112.24.26:5003/api/users/users");
+      const response = await fetch(
+        "https://admin.gmcables.com/api/users/users"
+      );
       const participantItem = await response.json();
       setParticipant(participantItem?.data);
     } catch (error) {
@@ -74,7 +78,7 @@ export const AppProvider = ({ children }) => {
   const eventParticipantDisplay = async () => {
     try {
       const response = await fetch(
-        "http://51.112.24.26:5003/api/email/getReport"
+        "https://admin.gmcables.com/api/email/getReport"
       );
       const getReport = await response.json();
       setEventParticipant(getReport?.data);
@@ -86,7 +90,7 @@ export const AppProvider = ({ children }) => {
   const eventParticipantSummary = async () => {
     try {
       const response = await fetch(
-        "http://51.112.24.26:5003/api/email/geteventSumary"
+        "https://admin.gmcables.com/api/email/geteventSumary"
       );
       const eventSumary = await response.json();
 
@@ -100,7 +104,7 @@ export const AppProvider = ({ children }) => {
   const userGroupDisplay = async () => {
     try {
       const response = await fetch(
-        "http://51.112.24.26:5003/api/users/user_group"
+        "https://admin.gmcables.com/api/users/user_group"
       );
       const user_group = await response.json();
       setUserGroup(user_group?.data);

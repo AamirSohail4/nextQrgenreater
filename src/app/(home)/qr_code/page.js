@@ -102,7 +102,7 @@ function Event() {
     if (confirmDelete) {
       try {
         const response = await fetch(
-          `http://51.112.24.26:5003/api/codes/delete/${id}`,
+          `https://admin.gmcables.com/api/codes/delete/${id}`,
           {
             method: "DELETE",
           }
@@ -145,7 +145,7 @@ function Event() {
     const formattedData = filteredEvents.map((event, index) => ({
       Sr: index + 1, // Add a serial number
       ID: event.intID,
-      "QR Code": `http://51.112.24.26:5004/qr_code_validator/${event.strCode}`,
+      "QR Code": `https://qr.gmcables.com/qr_code_validator/${event.strCode}`,
       "Last Scanned At": event.dtLastScanned_at
         ? formatDateTime(event.dtLastScanned_at)
         : "",
@@ -202,7 +202,7 @@ function Event() {
     const qrCodeCanvas = document.createElement("canvas");
     QRCode.toCanvas(
       qrCodeCanvas,
-      `http://51.112.24.26:5004/qr_code_validator/${strCode}`,
+      `https://qr.gmcables.com/qr_code_validator/${strCode}`,
 
       { errorCorrectionLevel: "M", scale: 4 },
       (error) => {
@@ -371,7 +371,7 @@ function Event() {
                   <td>{globalIndex}</td>
                   <td>{event.intID}</td>
                   <td>{format(new Date(event.dtCreated_at), "dd-MM-yyyy")}</td>
-                  <td>{`http://51.112.24.26:5004/qr_code_validator/${event.strCode}`}</td>
+                  <td>{`https://qr.gmcables.com/qr_code_validator/${event.strCode}`}</td>
                   <td>{event.strRemarks}</td>
                   <td style={{ textAlign: "center", verticalAlign: "middle" }}>
                     <button

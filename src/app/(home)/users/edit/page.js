@@ -69,7 +69,7 @@ const EditUserForm = () => {
     const fetchEvent = async () => {
       try {
         const res = await fetch(
-          `http://51.112.24.26:5003/api/users/users/${id}`
+          `https://admin.gmcables.com/api/users/users/${id}`
         );
         if (res.ok) {
           const result = await res.json();
@@ -122,7 +122,7 @@ const EditUserForm = () => {
 
     try {
       const response = await axios.patch(
-        `http://51.112.24.26:5003/api/users/edit/${id}`,
+        `https://admin.gmcables.com/api/users/edit/${id}`,
         form,
         { headers: { "Content-Type": "multipart/form-data" } }
       );
@@ -263,7 +263,7 @@ const EditUserForm = () => {
                 />
               ) : (
                 <Image
-                  src={`http://51.112.24.26:5003/${formData.picture}`}
+                  src={`https://admin.gmcables.com/${formData.picture}`}
                   alt={formData.name || "User Image"}
                   width={50}
                   height={50}

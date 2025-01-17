@@ -22,7 +22,7 @@ function EditUserGroup() {
     const fetchGroupData = async () => {
       try {
         const res = await fetch(
-          `http://51.112.24.26:5003/api/users/user_group/${id}`
+          `https://admin.gmcables.com/api/users/user_group/${id}`
         );
         if (res.ok) {
           const result = await res.json();
@@ -63,7 +63,7 @@ function EditUserGroup() {
 
     try {
       const res = await fetch(
-        `http://51.112.24.26:5003/api/users/edit_user_group/${id}`,
+        `https://admin.gmcables.com/api/users/edit_user_group/${id}`,
         {
           method: "PATCH",
           body: data,

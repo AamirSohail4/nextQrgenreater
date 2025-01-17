@@ -24,7 +24,7 @@ export default function EventSummary() {
 
     try {
       const response = await fetch(
-        `http://51.112.24.26:5003/api/codes/get_scan_log/${filters.qrCode}`
+        `https://admin.gmcables.com/api/codes/get_scan_log/${filters.qrCode}`
       );
       const data = await response.json();
 

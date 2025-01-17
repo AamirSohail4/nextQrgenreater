@@ -33,13 +33,16 @@ export default function Page() {
       data.append("email", formData.user_name);
       data.append("password", formData.password);
 
-      const res = await fetch("http://51.112.24.26:5003/api/users/userLogin", {
-        method: "POST",
-        body: data,
-      });
+      const res = await fetch(
+        "https://admin.gmcables.com/api/users/userLogin",
+        {
+          method: "POST",
+          body: data,
+        }
+      );
 
       const response = await res.json();
-
+      console.log("That is a login Response Mr Aamir", response);
       if (res.ok && response.success) {
         alert(response.message);
         localStorage.setItem("token", response.token);

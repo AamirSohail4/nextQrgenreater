@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import { useState, useEffect, Suspense } from "react";
 import React from "react";
 
@@ -24,7 +25,7 @@ function QRcodeValidator({ params }) {
     try {
       setLoading(true);
       const res = await fetch(
-        `http://51.112.24.26:5003/api/codes/validate_qrcode/${code}`
+        `https://admin.gmcables.com/api/codes/validate_qrcode/${code}`
       );
       const data = await res.json();
 
@@ -32,7 +33,7 @@ function QRcodeValidator({ params }) {
         const lastScannedDate = data?.data?.dtLast_Scanned_at
           ? new Intl.DateTimeFormat("en-GB", {
               day: "2-digit",
-              month: "2-digit",
+              month: "long",
               year: "numeric",
               hour: "2-digit",
               minute: "2-digit",
@@ -79,6 +80,15 @@ function QRcodeValidator({ params }) {
           backgroundColor: "#fff",
         }}
       >
+        <div className="mb-4 text-center">
+          <Image
+            src="/images/logogm.PNG"
+            alt="eventRegistration"
+            width={230} // Width in pixels
+            height={200} // Height in pixels, you can adjust this as needed
+            className="img-fluid"
+          />
+        </div>
         <h1 className="mb-4 text-center text-primary">QR Code Validation</h1>
 
         {loading ? (
@@ -89,9 +99,7 @@ function QRcodeValidator({ params }) {
           </div>
         ) : (
           <div className="text-center">
-            <p className="lead mb-3">
-              {strCode ? `QR Code: ${strCode}` : "No QR code scanned"}
-            </p>
+            <p className="lead mb-3"></p>
             {validationMessage?.status === "success" ? (
               <div className="alert alert-success text-start">
                 <p>

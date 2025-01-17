@@ -107,7 +107,7 @@ function Users({ authData }) {
     if (confirmDelete) {
       try {
         const response = await fetch(
-          `http://51.112.24.26:5003/api/users/user_group/${id}`,
+          `https://admin.gmcables.com/api/users/user_group/${id}`,
           {
             method: "DELETE",
           }

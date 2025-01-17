@@ -28,38 +28,86 @@ function AddQRCode() {
     );
   };
 
+  // const handleSubmit = async (e) => {
+  //   e.preventDefault();
+
+  //   const number = parseInt(count, 10);
+  //   if (isNaN(number) || number <= 0 || number > 500) {
+  //     alert("Please enter a valid number between 1 and 100.");
+  //     return;
+  //   }
+
+  //   const generatedCodes = generateUniqueCodes(number);
+
+  //   const requestBody = { strCode: generatedCodes, remarks: remarks };
+  //   console.log("That is a requestBody", requestBody);
+  //   try {
+  //     setIsSubmitting(true);
+  //     const response = await fetch("https://admin.gmcables.com/api/codes/qr_codes", {
+  //       method: "POST",
+  //       headers: {
+  //         "Content-Type": "application/json",
+  //       },
+  //       body: JSON.stringify(requestBody),
+  //     });
+
+  //     if (response.ok) {
+  //       const responseData = await response.json();
+  //       console.log("That is a response==", responseData);
+  //       alert("QR codes submitted successfully!");
+  //       setQrCodes(responseData.data);
+  //       qrCodDisplay();
+  //       setCount("");
+  //     } else {
+  //       const error = await response.json();
+  //       alert(`Error: ${error.message}`);
+  //     }
+  //   } catch (error) {
+  //     console.error("Error submitting QR codes:", error);
+  //     alert("An error occurred while submitting QR codes.");
+  //   } finally {
+  //     setIsSubmitting(false);
+  //   }
+  // };
   const handleSubmit = async (e) => {
     e.preventDefault();
 
     const number = parseInt(count, 10);
     if (isNaN(number) || number <= 0 || number > 500) {
-      alert("Please enter a valid number between 1 and 100.");
+      alert("Please enter a valid number between 1 and 500.");
       return;
     }
 
+    // Function to generate unique QR codes
     const generatedCodes = generateUniqueCodes(number);
 
-    const requestBody = { strCode: generatedCodes, remarks: remarks };
-    console.log("That is a requestBody", requestBody);
+    const requestBody = {
+      strCode: generatedCodes,
+      remarks: remarks || "",
+    };
+
+    console.log("This is the requestBody:", requestBody);
+
     try {
       setIsSubmitting(true);
       const response = await fetch(
-        "http://51.112.24.26:5003/api/codes/add_qrCode",
+        "https://admin.gmcables.com/api/codes/add_qrCode",
         {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
           },
-          body: JSON.stringify(requestBody),
+          body: JSON.stringify(requestBody), // Convert the requestBody to JSON string
         }
       );
 
       if (response.ok) {
         const responseData = await response.json();
+        console.log("This is the response:", responseData);
         alert("QR codes submitted successfully!");
-        setQrCodes(responseData.data);
-        qrCodDisplay();
-        setCount("");
+        setQrCodes(responseData.data); // Update the state with the response data
+        qrCodDisplay(); // Call any display function if needed
+        setCount(""); // Reset count input after submission
       } else {
         const error = await response.json();
         alert(`Error: ${error.message}`);
@@ -68,10 +116,9 @@ function AddQRCode() {
       console.error("Error submitting QR codes:", error);
       alert("An error occurred while submitting QR codes.");
     } finally {
-      setIsSubmitting(false);
+      setIsSubmitting(false); // Ensure submitting state is reset
     }
   };
-
   const handleClear = () => {
     setCount("");
     setQrCodes([]);
@@ -104,7 +151,7 @@ function AddQRCode() {
     const formattedData = qrCodes.map((event, index) => ({
       Sr: index + 1, // Add a serial number
       ID: event.intID,
-      "QR Code": `http://51.112.24.26:5004/qr_code_validator/${event.strCode}`,
+      "QR Code": `https://qr.gmcables.com/qr_code_validator/${event.strCode}`,
       "Last Scanned At": event.dtLastScanned_at
         ? formatDateTime(event.dtLastScanned_at)
         : "",
@@ -166,7 +213,7 @@ function AddQRCode() {
 
     for (let i = 0; i < qrCodes.length; i++) {
       const event = qrCodes[i];
-      const qrCodeURL = `http://51.112.24.26:5004/qr_code_validator/${event.strCode}`;
+      const qrCodeURL = `https://qr.gmcables.com/qr_code_validator/${event.strCode}`;
 
       try {
         const qrCodeDataURL = await QRCode.toDataURL(qrCodeURL, {
@@ -201,199 +248,6 @@ function AddQRCode() {
 
     pdf.save(filename);
   };
-
-  // Your existing component and other imports...
-  // const exportToPDF = async () => {
-  //   // Define custom page size: 3.2 inches x 0.75 inches
-  //   const pageWidth = 81.05; // 3.2 inches in mm
-  //   const pageHeight = 81.28; //19.05; // 0.75 inches in mm
-
-  //   const pdf = new jsPDF({
-  //     unit: "mm", // Units for dimensions
-  //     format: [pageWidth, pageHeight], // Custom page size [width, height]
-  //   });
-
-  //   const qrCodeWidth = 76.2; // QR code width (3.00 inches in mm)
-  //   const qrCodeHeight = 19.05; // QR code height (0.75 inches in mm)
-  //   const marginLeft = (pageWidth - qrCodeWidth) / 2; // Center QR code horizontally
-  //   const marginTop = 0; // Start at the top of the page
-
-  //   for (let i = 0; i < qrCodes.length; i++) {
-  //     const event = qrCodes[i];
-  //     const qrCodeURL = `http://51.112.24.26:5004/qr_code_validator/${event.strCode}`;
-
-  //     try {
-  //       const qrCodeDataURL = await QRCode.toDataURL(qrCodeURL, {
-  //         errorCorrectionLevel: "M",
-  //         scale: 4, // Scale for high resolution
-  //       });
-
-  //       // Add the QR code to the custom-sized PDF
-  //       pdf.addImage(
-  //         qrCodeDataURL, // QR code image
-  //         "PNG", // Image format
-  //         marginLeft, // X position
-  //         marginTop, // Y position
-  //         qrCodeWidth, // Width
-  //         qrCodeHeight // Height
-  //       );
-
-  //       // Add a new page for the next QR code, unless it's the last one
-  //       if (i < qrCodes.length - 1) {
-  //         pdf.addPage([pageWidth, pageHeight]); // Create a new page with the same custom size
-  //       }
-  //     } catch (error) {
-  //       console.error(`Failed to generate QR code for ${qrCodeURL}:`, error);
-  //     }
-  //   }
-
-  //   // Save the PDF with a filename
-  //   const now = new Date();
-  //   const formattedDate = now.toISOString().split("T")[0]; // YYYY-MM-DD format
-  //   const formattedTime = now.toTimeString().split(" ")[0].replace(/:/g, "-"); // HH-MM-SS format
-  //   const filename = `QRCode_Export-${formattedDate}-${formattedTime}.pdf`;
-
-  //   pdf.save(filename);
-  // };
-
-  //1
-  // const exportToPDF = async () => {
-  //   const pdf = new jsPDF();
-  //   const qrCodeSize = 50; // Size of the QR code in mm
-  //   const marginTop = 50; // Top margin for QR code on each page
-  //   const marginLeft = 120; // Center the QR code on the page
-
-  //   for (let i = 0; i < qrCodes.length; i++) {
-  //     const event = qrCodes[i];
-  //     const qrCodeURL = `http://51.112.24.26:5004/qr_code_validator/${event.strCode}`;
-
-  //     // Generate QR code as a data URL
-  //     try {
-  //       const qrCodeDataURL = await QRCode.toDataURL(qrCodeURL, {
-  //         errorCorrectionLevel: "M",
-  //         scale: 4, // Scale the QR code size
-  //       });
-
-  //       // Add the QR code to the PDF
-  //       pdf.addImage(
-  //         qrCodeDataURL, // QR code image
-  //         "PNG", // Image format
-  //         marginLeft, // X position
-  //         marginTop, // Y position
-  //         qrCodeSize, // Width
-  //         qrCodeSize // Height
-  //       );
-
-  //       // Add a new page for the next QR code, unless it's the last one
-  //       if (i < qrCodes.length - 1) {
-  //         pdf.addPage();
-  //       }
-  //     } catch (error) {
-  //       console.error(`Failed to generate QR code for ${qrCodeURL}:`, error);
-  //     }
-  //   }
-
-  //   // Save the PDF with a filename
-  //   const now = new Date();
-  //   const formattedDate = now.toISOString().split("T")[0]; // YYYY-MM-DD format
-  //   const formattedTime = now.toTimeString().split(" ")[0].replace(/:/g, "-"); // HH-MM-SS format
-  //   const filename = `QRCode_Export-${formattedDate}-${formattedTime}.pdf`;
-
-  //   pdf.save(filename);
-  // };
-  //2
-  // const exportToPDF = async () => {
-  //   const pdf = new jsPDF();
-  //   const qrCodeWidth = 76.2; // Width of the QR code in mm (3.00 inches)
-  //   const qrCodeHeight = 19.05; // Height of the QR code in mm (0.75 inches)
-  //   const marginTop = 50; // Top margin for QR code on each page
-  //   const marginLeft = 75; // Center the QR code on the page
-
-  //   for (let i = 0; i < qrCodes.length; i++) {
-  //     const event = qrCodes[i];
-  //     const qrCodeURL = `http://51.112.24.26:5004/qr_code_validator/${event.strCode}`;
-
-  //     // Generate QR code as a data URL
-  //     try {
-  //       const qrCodeDataURL = await QRCode.toDataURL(qrCodeURL, {
-  //         errorCorrectionLevel: "M",
-  //         scale: 2, // Scale the QR code size
-  //       });
-
-  //       // Add the QR code to the PDF
-  //       pdf.addImage(
-  //         qrCodeDataURL, // QR code image
-  //         "PNG", // Image format
-  //         marginLeft, // X position
-  //         marginTop, // Y position
-  //         qrCodeWidth, // Width
-  //         qrCodeHeight // Height
-  //       );
-
-  //       // Add a new page for the next QR code, unless it's the last one
-  //       if (i < qrCodes.length - 1) {
-  //         pdf.addPage();
-  //       }
-  //     } catch (error) {
-  //       console.error(`Failed to generate QR code for ${qrCodeURL}:`, error);
-  //     }
-  //   }
-
-  //   // Save the PDF with a filename
-  //   const now = new Date();
-  //   const formattedDate = now.toISOString().split("T")[0]; // YYYY-MM-DD format
-  //   const formattedTime = now.toTimeString().split(" ")[0].replace(/:/g, "-"); // HH-MM-SS format
-  //   const filename = `QRCode_Export-${formattedDate}-${formattedTime}.pdf`;
-
-  //   pdf.save(filename);
-  // };
-  //3
-  // const exportToPDF = async () => {
-  //   const pdf = new jsPDF();
-
-  //   const qrCodeWidth = 76.2; // 3.00 inches in mm
-  //   const qrCodeHeight = 19.05; // 0.75 inches in mm
-  //   const marginTop = 50; // Top margin for QR code on each page
-  //   const marginLeft = 120; // Center the QR code on the page
-
-  //   for (let i = 0; i < qrCodes.length; i++) {
-  //     const event = qrCodes[i];
-  //     const qrCodeURL = `http://51.112.24.26:5004/qr_code_validator/${event.strCode}`;
-
-  //     // Generate QR code as a data URL
-  //     try {
-  //       const qrCodeDataURL = await QRCode.toDataURL(qrCodeURL, {
-  //         errorCorrectionLevel: "M",
-  //         scale: 4, // Scale to enhance resolution for larger size
-  //       });
-
-  //       // Add the QR code to the PDF with the specified size
-  //       pdf.addImage(
-  //         qrCodeDataURL, // QR code image
-  //         "PNG", // Image format
-  //         marginLeft, // X position
-  //         marginTop, // Y position
-  //         qrCodeWidth, // Width (76.2 mm)
-  //         qrCodeHeight // Height (19.05 mm)
-  //       );
-
-  //       // Add a new page for the next QR code, unless it's the last one
-  //       if (i < qrCodes.length - 1) {
-  //         pdf.addPage();
-  //       }
-  //     } catch (error) {
-  //       console.error(`Failed to generate QR code for ${qrCodeURL}:`, error);
-  //     }
-  //   }
-
-  //   // Save the PDF with a filename
-  //   const now = new Date();
-  //   const formattedDate = now.toISOString().split("T")[0]; // YYYY-MM-DD format
-  //   const formattedTime = now.toTimeString().split(" ")[0].replace(/:/g, "-"); // HH-MM-SS format
-  //   const filename = `QRCode_Export-${formattedDate}-${formattedTime}.pdf`;
-
-  //   pdf.save(filename);
-  // };
 
   return (
     <div className="d-flex justify-content-center align-items-center mt-5">
@@ -504,7 +358,7 @@ function AddQRCode() {
                   <tr key={code.intID}>
                     <td>{index + 1}</td>
                     <td>{code.intID}</td>
-                    <td>{`http://51.112.24.26:5004/qr_code_validator/${code.strCode}`}</td>
+                    <td>{`https://qr.gmcables.com/qr_code_validator/${code.strCode}`}</td>
                     <td>
                       {new Date(code.dtCreated_at).toLocaleDateString("en-GB")}
                     </td>
